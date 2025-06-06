@@ -8,19 +8,21 @@ defmodule QlcDigital.MessageHandler do
       "hi" ->
         response =
           """
-          Hello! Welcome to the Sister Check-In Circle Program!\n
+          Hello!
+          Welcome to the Sister Check-In Circle Program!
 
-          This Program is deisgned to help new and expectant mothers who
-          may be experiencing anxiety, depression, or simply need additional
-          support during this critical time in their lives. \n
+          This Program is designed to help new and expectant mothers who may be experiencing anxiety,
+          depression, or simply need additional support during this critical time in their lives.
+
           The program connects mothers with trained facilitators and peer support
-          groups via WhatsApp, providing convenient access to mental health resources
-          and community support.\n
-          If you are interested in joining this program, we would like to ask a few questions:
-          \n1. What is your name?
+          groups via WhatsApp, providing convenient access to mental health resources and community support.
+
+          If you are interested in joining this program, we would like to ask a few questions.
           """
 
+        question = "1. What is your name?"
         send_message(from, response)
+        send_message(from, question)
         Logger.info("Responded to 'hi' from #{from}")
 
       name when name != "" ->
@@ -33,14 +35,13 @@ defmodule QlcDigital.MessageHandler do
           send_message(from, response)
         else
           # Generic response for other messages
-          response =
-            "Thanks for your message! I'm a simple bot. Say 'hi' to start a conversation."
+          response = "Say 'hi' to start a conversation."
 
           send_message(from, response)
         end
 
       _ ->
-        response = "Thanks for your message! I'm a simple bot. Say 'hi' to start a conversation."
+        response = "Say 'hi' to start a conversation."
         send_message(from, response)
     end
   end
