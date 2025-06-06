@@ -2,7 +2,7 @@ defmodule QlcDigital.MessageHandler do
   require Logger
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
-    Logger.info("Received message from #{from}: #{body}")
+    Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
     case String.downcase(String.trim(body)) do
       "hi" ->
@@ -52,7 +52,7 @@ defmodule QlcDigital.MessageHandler do
   defp send_message(to, message) do
     config = QlcDigital.Config.get_config()
 
-    url = "https://graph.facebook.com/v18.0/#{config.whatsapp_phone_id}/messages"
+    url = "https://graph.facebook.com/v22.0/#{config.whatsapp_phone_id}/messages"
 
     headers = [
       {"Authorization", "Bearer #{config.whatsapp_token}"},

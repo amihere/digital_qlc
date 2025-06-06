@@ -4,12 +4,28 @@ defmodule QlcDigital.Application do
 
   @impl true
   def start(_type, _args) do
+    port = Application.get_env(:qlc_digital, :port)
+    host = Application.get_env(:qlc_digital, :host)
+
     children = [
-      {Plug.Cowboy, scheme: :http, plug: QlcDigital.Router, options: [port: 4000]}
+      {
+        Plug.Cowboy,
+        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]
+      }
     ]
 
     opts = [strategy: :one_for_one, name: QlcDigital.Supervisor]
-    Logger.info("Starting the QLC Digital Bot on port 4000")
+    Logger.info("Starting the QLC Digital Bot on port #{port} and host #{host}")
     Supervisor.start_link(children, opts)
+  end
+
+  defp parse_ip(host) do
+    case :inet.parse_address(String.to_charlist(host)) do
+      {:ok, ip} ->
+        ip
+
+      {:error, _} ->
+        {0, 0, 0, 0}
+    end
   end
 end
