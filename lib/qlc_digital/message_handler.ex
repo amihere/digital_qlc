@@ -6,7 +6,20 @@ defmodule QlcDigital.MessageHandler do
 
     case String.downcase(String.trim(body)) do
       "hi" ->
-        response = "Hello! What is your name?"
+        response =
+          """
+          Hello! Welcome to the Sister Check-In Circle Program!\n
+
+          This Program is deisgned to help new and expectant mothers who
+          may be experiencing anxiety, depression, or simply need additional
+          support during this critical time in their lives. \n
+          The program connects mothers with trained facilitators and peer support
+          groups via WhatsApp, providing convenient access to mental health resources
+          and community support.\n
+          If you are interested in joining this program, we would like to ask a few questions:
+          \n1. What is your name?
+          """
+
         send_message(from, response)
         Logger.info("Responded to 'hi' from #{from}")
 
@@ -16,7 +29,7 @@ defmodule QlcDigital.MessageHandler do
              (String.length(name) > 1 and String.length(name) < 50 and
                 not String.contains?(name, " ")) do
           Logger.info("User #{from} provided name: #{name}")
-          response = "Nice to meet you, #{extract_name(name)}! How can I help you today?"
+          response = "Nice to meet you, #{extract_name(name)}! Second, what is your age?"
           send_message(from, response)
         else
           # Generic response for other messages
