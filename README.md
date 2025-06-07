@@ -1,6 +1,6 @@
 # QlcDigital
 
-**TODO: Add description**
+Supportive community for women's mental health
 
 ## Installation
 
