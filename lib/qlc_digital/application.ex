@@ -8,6 +8,7 @@ defmodule QlcDigital.Application do
     host = Application.get_env(:qlc_digital, :host)
 
     children = [
+      QlcDigital.Repo,
       {
         Plug.Cowboy,
         scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]

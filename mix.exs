@@ -14,7 +14,7 @@ defmodule QlcDigital.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :ecto_sql, :exqlite],
       mod: {QlcDigital.Application, []}
     ]
   end
@@ -27,7 +27,10 @@ defmodule QlcDigital.MixProject do
       {:httpoison, "~> 2.0"},
       {:jason, "~> 1.4"},
       {:plug_cowboy, "~> 2.6"},
-      {:plug, "~> 1.14"}
+      {:plug, "~> 1.14"},
+      {:ecto_sql, "~> 3.10"},
+      {:ecto_sqlite3, "~> 0.12"},
+      {:exqlite, "~> 0.13"}
     ]
   end
 end

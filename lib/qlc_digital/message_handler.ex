@@ -1,8 +1,12 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
+  alias WhatsappBot.{Repo, User, Question}
+  import Ecto.Query
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
+
+    user = get_or_create_user(from)
 
     case String.downcase(String.trim(body)) do
       "hi" ->
@@ -48,6 +52,20 @@ defmodule QlcDigital.MessageHandler do
 
   def handle_message(message) do
     Logger.info("Received non-text message: #{inspect(message)}")
+  end
+
+  defp get_or_create_user(phone) do
+    case Repo.get_by(User, phone: phone) do
+      nil ->
+        %User{}
+        |> User.changeset(%{phone: phone})
+        |> Repo.insert!()
+        |> tap(fn user -> Logger.info("Created new user: #{user.phone}") end)
+
+      user ->
+        Logger.info("Found existing user: #{user.phone}")
+        user
+    end
   end
 
   defp extract_name(text) do
