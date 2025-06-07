@@ -10,10 +10,10 @@ defmodule QlcDigital.MessageHandler do
       {:ok, _} ->
         manage_next_step(from, body)
 
-      _ ->
+      step ->
         case String.downcase(String.trim(body)) do
           "hi" -> manage_next_step(from, body)
-          _ -> manage_next_step(from, body, 2)
+          _ -> manage_next_step(from, body, step + 1)
         end
     end
   end
@@ -38,6 +38,7 @@ defmodule QlcDigital.MessageHandler do
           """
 
         send_message(from, response)
+        Redis.set(from <> ".current", step)
         Logger.info("Responded to 'hi' from #{from}")
 
       2 ->
@@ -50,6 +51,7 @@ defmodule QlcDigital.MessageHandler do
           Logger.info("User #{from} provided name: #{name}")
           response = "Nice to meet you, #{extract_name(name)}! Second, what is your age?"
           send_message(from, response)
+          Redis.set(from <> ".current", step + 1)
         else
           # Generic response for other messages
           send_message(from, response)
