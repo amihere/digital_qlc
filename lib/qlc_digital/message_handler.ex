@@ -1,11 +1,28 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
+  alias QlcDigital.Redis
+
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    case String.downcase(String.trim(body)) do
-      "hi" ->
+    case Redis.get(from <> ".current-step") do
+      {:ok, _} ->
+        manage_next_step(from, body)
+
+      _ ->
+        case String.downcase(String.trim(body)) do
+          "hi" -> manage_next_step(from, body)
+          _ -> manage_next_step(from, body, 2)
+        end
+    end
+  end
+
+  def manage_next_step(from, body, step \\ 1) do
+    response = "Thanks for your message! Say 'hi' to start a conversation."
+
+    case step do
+      1 ->
         response =
           """
           Hello! Welcome to the Sister Check-In Circle Program!\n
@@ -23,8 +40,10 @@ defmodule QlcDigital.MessageHandler do
         send_message(from, response)
         Logger.info("Responded to 'hi' from #{from}")
 
-      name when name != "" ->
+      2 ->
         # Check if this might be a name response (simple heuristic)
+        name = body
+
         if String.contains?(name, ["my name is", "i am", "i'm"]) or
              (String.length(name) > 1 and String.length(name) < 50 and
                 not String.contains?(name, " ")) do
@@ -33,14 +52,10 @@ defmodule QlcDigital.MessageHandler do
           send_message(from, response)
         else
           # Generic response for other messages
-          response =
-            "Thanks for your message! I'm a simple bot. Say 'hi' to start a conversation."
-
           send_message(from, response)
         end
 
       _ ->
-        response = "Thanks for your message! I'm a simple bot. Say 'hi' to start a conversation."
         send_message(from, response)
     end
   end
