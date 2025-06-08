@@ -70,12 +70,12 @@ defmodule QlcDigital.Redis do
 
   def hmset(key, field_values) when is_map(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-    rest_command(["HMSET", key] ++ args)
+    rest_command(["HMSET", @namespace <> key] ++ args)
   end
 
   def hmset(key, field_values) when is_list(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-    rest_command(["HMSET", key] ++ args)
+    rest_command(["HMSET", @namespace <> key] ++ args)
   end
 
   # List operations
