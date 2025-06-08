@@ -5,7 +5,7 @@ defmodule QlcDigital.Redis do
   @redis_config Application.compile_env(:qlc_digital, :redis, [])
   @url @redis_config[:url]
   @token @redis_config[:token]
-  @namespace @redis_config[:namespace]
+  @namespace @redis_config[:namespace] <> "."
 
   # REST API approach (recommended for serverless environments)
   def rest_command(command) do
