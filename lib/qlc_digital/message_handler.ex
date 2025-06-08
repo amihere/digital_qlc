@@ -73,7 +73,7 @@ defmodule QlcDigital.MessageHandler do
           response = """
           Nice to meet you, #{extract_name(name)}!
 
-          2. What is your age?"
+          2. What is your age?
           """
 
           send_message(from, response)
@@ -83,23 +83,26 @@ defmodule QlcDigital.MessageHandler do
           send_message(from, response)
         end
 
-      2 when is_integer(body) ->
+      2 when is_binary(body) ->
         # Check if this might be a name response (simple heuristic)
         Logger.info("User #{from} provided age: #{body}")
 
-        response = """
-        Thanks!
+        case Integer.parse(body) do
+          {age, ""} ->
+            response = """
+            Thanks!
 
-        3. What is your email? (Say NO if you don't have one)
-        """
+            3. What is your email? (Say NO if you don't have one)
+            """
 
-        send_message(from, response)
-        Redis.set(from <> ".current", step + 1)
+            send_message(from, response)
+            Redis.set(from <> ".current", step + 1)
 
-      2 ->
-        Logger.info("User #{from} provided age as: #{body}")
-        response = "Please enter you age as a number (e.g. 18)"
-        send_message(from, response)
+          :error ->
+            Logger.info("User #{from} provided age as: #{body}")
+            response = "Please enter your age as a number (e.g. 18)"
+            send_message(from, response)
+        end
 
       3 ->
         Logger.info("User #{from} provided email as: #{body}")
