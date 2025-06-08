@@ -6,14 +6,20 @@ defmodule QlcDigital.MessageHandler do
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    case Redis.get(from <> ".current") do
-      {:ok, _} ->
+    # Hi overrides all previous progress
+    case String.downcase(String.trim(body)) do
+      "hi" ->
         manage_next_step(from, body)
 
-      step ->
-        case String.downcase(String.trim(body)) do
-          "hi" -> manage_next_step(from, body)
-          _ -> manage_next_step(from, body, step)
+      _ ->
+        # Find user. If they exist, resume else start from -
+        case Redis.get(from <> ".current") do
+          {:ok, step} ->
+            manage_next_step(from, body, step)
+
+          {:error, _} ->
+            Logger.info("The user #{from} is new")
+            manage_next_step(from, body)
         end
     end
   end
@@ -55,17 +61,30 @@ defmodule QlcDigital.MessageHandler do
              (String.length(name) > 1 and String.length(name) < 50 and
                 not String.contains?(name, " ")) do
           Logger.info("User #{from} provided name: #{name}")
-          response = "Nice to meet you, #{extract_name(name)}! Second, what is your age?"
+
+          response = """
+          Nice to meet you, #{extract_name(name)}!
+
+          2. What is your age?"
+          """
+
           send_message(from, response)
           Redis.set(from <> ".current", step + 1)
         else
+          Logger.info("User #{from} provided name: #{name} #{body}")
           send_message(from, response)
         end
 
       2 when is_integer(body) ->
         # Check if this might be a name response (simple heuristic)
         Logger.info("User #{from} provided age: #{body}")
-        response = "Thanks! Third, what is your email? Say NO if you do not have an email."
+
+        response = """
+        Thanks!
+
+        3. What is your email? (Say NO if you don't have one)
+        """
+
         send_message(from, response)
         Redis.set(from <> ".current", step + 1)
 
