@@ -13,9 +13,9 @@ defmodule QlcDigital.MessageHandler do
 
       _ ->
         # Find user. If they exist, resume else start from -
-        case Redis.hgetall(get_hmap_key(from)) do
-          %{"result" => %{"step" => step}} ->
-            case Integer.parse(step) do
+        case Redis.hgetall_as_struct(get_hmap_key(from), User) do
+          %{"result" => user} ->
+            case Integer.parse(user.step) do
               {numberedStep, ""} ->
                 manage_next_step(from, body, numberedStep)
 
@@ -60,8 +60,8 @@ defmodule QlcDigital.MessageHandler do
         send_message(from, question)
 
         Logger.info("Responded to 'hi' from #{from}")
-
-        Redis.hmset(get_hmap_key(from), %{"phone" => from, "step" => step + 1})
+        user = %User{:phone => from, :step => step + 1}
+        Redis.hmset(get_hmap_key(from), user |> Map.from_struct())
 
       1 ->
         # Check if this might be a name response (simple heuristic)
