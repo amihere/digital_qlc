@@ -6,7 +6,7 @@ defmodule QlcDigital.MessageHandler do
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    case Redis.get(from <> ".current-step") do
+    case Redis.get(from <> ".current") do
       {:ok, _} ->
         manage_next_step(from, body)
 
@@ -25,20 +25,22 @@ defmodule QlcDigital.MessageHandler do
       0 ->
         response =
           """
-          Hello! Welcome to the Sister Check-In Circle Program!\n
+          Hello!
+          Welcome to the Sister Check-In Circle Program!
 
-          This Program is deisgned to help new and expectant mothers who
-          may be experiencing anxiety, depression, or simply need additional
-          support during this critical time in their lives. \n
+          This Program is designed to help new and expectant mothers who may be experiencing anxiety,
+          depression, or simply need additional support during this critical time in their lives.
+
           The program connects mothers with trained facilitators and peer support
-          groups via WhatsApp, providing convenient access to mental health resources
-          and community support.\n
-          If you are interested in joining this program, we would like to ask a few questions:
-          \n1. What is your name?
+          groups via WhatsApp, providing convenient access to mental health resources and community support.
+
+          If you are interested in joining this program, we would like to ask a few questions.
           """
 
+        question = "1. What is your name?"
         send_message(from, response)
         Redis.set(from <> ".current", step + 1)
+        send_message(from, question)
         Logger.info("Responded to 'hi' from #{from}")
 
       1 ->
@@ -53,7 +55,6 @@ defmodule QlcDigital.MessageHandler do
           send_message(from, response)
           Redis.set(from <> ".current", step + 1)
         else
-          # Generic response for other messages
           send_message(from, response)
         end
 
@@ -81,7 +82,7 @@ defmodule QlcDigital.MessageHandler do
         """
 
         send_message(from, response)
-
+        Redis.set(from <> ".current", step + 1)
       _ ->
         send_message(from, response)
     end
