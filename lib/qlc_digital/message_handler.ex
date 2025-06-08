@@ -14,11 +14,19 @@ defmodule QlcDigital.MessageHandler do
       _ ->
         # Find user. If they exist, resume else start from -
         case Redis.get(from <> ".current") do
-          {:ok, step} ->
-            manage_next_step(from, body, step)
+          %{"result" => step} ->
+            case Integer.parse(step) do
+              {numberedStep, ""} ->
+                manage_next_step(from, body, numberedStep)
 
-          {:error, _} ->
+              _ ->
+                Logger.error("Step was invalid")
+                manage_next_step(from, body)
+            end
+
+          {:error, reason} ->
             Logger.info("The user #{from} is new")
+            Logger.error("Could not find user #{reason}")
             manage_next_step(from, body)
         end
     end
