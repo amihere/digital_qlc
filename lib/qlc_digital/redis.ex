@@ -68,6 +68,58 @@ defmodule QlcDigital.Redis do
     rest_command(["HGETALL", @namespace <> key])
   end
 
+  def hgetall_as_map(key) do
+    case hgetall(key) do
+      {:ok, fields} when is_list(fields) ->
+        map =
+          fields |> Enum.chunk_every(2) |> Enum.into(%{}, fn [field, value] -> {field, value} end)
+
+        {:ok, map}
+
+      {:ok, nil} ->
+        {:ok, %{}}
+
+      error ->
+        error
+    end
+  end
+
+  def hgetall_as_struct!(key, struct_module) do
+    case hgetall_as_struct(key, struct_module) do
+      {:ok, struct} ->
+        struct
+
+      {:error, reason} ->
+        raise "Failed to cast to struct: #{reason}"
+    end
+  end
+
+  def hgetall_as_struct(key, struct_module) do
+    case hgetall_as_map(key) do
+      {:ok, map} ->
+        # Convert string keys to atoms if needed
+        try do
+          atom_map =
+            Map.new(map, fn {k, v} ->
+              atom_key = if is_binary(k), do: String.to_existing_atom(k), else: k
+              {atom_key, v}
+            end)
+
+          struct = struct(struct_module, atom_map)
+          {:ok, struct}
+        rescue
+          ArgumentError ->
+            {:error, :invalid_struct_keys}
+
+          KeyError ->
+            {:error, :missing_struct_fields}
+        end
+
+      error ->
+        error
+    end
+  end
+
   def hmset(key, field_values) when is_map(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
     rest_command(["HMSET", @namespace <> key] ++ args)
