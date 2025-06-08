@@ -18,6 +18,10 @@ defmodule QlcDigital.MessageHandler do
     end
   end
 
+  def handle_message(message) do
+    Logger.info("Received non-text message: #{inspect(message)}")
+  end
+
   def manage_next_step(from, body, step \\ 0) do
     response = "Thanks for your message! Say 'hi' to start a conversation."
 
@@ -83,13 +87,10 @@ defmodule QlcDigital.MessageHandler do
 
         send_message(from, response)
         Redis.set(from <> ".current", step + 1)
+
       _ ->
         send_message(from, response)
     end
-  end
-
-  def handle_message(message) do
-    Logger.info("Received non-text message: #{inspect(message)}")
   end
 
   defp extract_name(text) do
