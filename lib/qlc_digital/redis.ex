@@ -68,6 +68,16 @@ defmodule QlcDigital.Redis do
     rest_command(["HGETALL", @namespace <> key])
   end
 
+  def hmset(key, field_values) when is_map(field_values) do
+    args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
+    rest_command(["HMSET", key] ++ args)
+  end
+
+  def hmset(key, field_values) when is_list(field_values) do
+    args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
+    rest_command(["HMSET", key] ++ args)
+  end
+
   # List operations
   def lpush(key, value) do
     rest_command(["LPUSH", @namespace <> key, value])

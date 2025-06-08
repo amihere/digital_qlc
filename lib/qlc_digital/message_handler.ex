@@ -1,7 +1,7 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
-  alias QlcDigital.Redis
+  alias QlcDigital.{User, Redis}
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
@@ -13,8 +13,8 @@ defmodule QlcDigital.MessageHandler do
 
       _ ->
         # Find user. If they exist, resume else start from -
-        case Redis.get(from <> ".current") do
-          %{"result" => step} ->
+        case Redis.get(create_key(from)) do
+          %{"result" => %{"step" => step}} ->
             case Integer.parse(step) do
               {numberedStep, ""} ->
                 manage_next_step(from, body, numberedStep)
@@ -57,9 +57,11 @@ defmodule QlcDigital.MessageHandler do
 
         question = "1. What is your name?"
         send_message(from, response)
-        Redis.set(from <> ".current", step + 1)
         send_message(from, question)
+
         Logger.info("Responded to 'hi' from #{from}")
+
+        Redis.hmset(create_key(from), %{"phone" => from, "step" => step + 1})
 
       1 ->
         # Check if this might be a name response (simple heuristic)
@@ -77,7 +79,7 @@ defmodule QlcDigital.MessageHandler do
           """
 
           send_message(from, response)
-          Redis.set(from <> ".current", step + 1)
+          Redis.hmset(create_key(from), %{name => name, step => step + 1})
         else
           Logger.info("User #{from} provided name: #{name} #{body}")
           send_message(from, response)
@@ -92,11 +94,15 @@ defmodule QlcDigital.MessageHandler do
             response = """
             Thanks!
 
-            3. What is your email? (Say NO if you don't have one)
+            3. What is your email?
+
+            (Say NO if you don't have one)
             """
 
             send_message(from, response)
-            Redis.set(from <> ".current", step + 1)
+
+            user = Redis.hgetall(create_key(from))
+            Redis.hmset(create_key(from), %{user | age => age, step => step + 1})
 
           :error ->
             Logger.info("User #{from} provided age as: #{body}")
@@ -105,10 +111,23 @@ defmodule QlcDigital.MessageHandler do
         end
 
       3 ->
+        email_public =
+          case body |> String.trim() |> String.downcase() do
+            "no" -> "(empty)"
+            email -> email
+          end
+
+        user = Redis.hgetall(create_key(from))
+
         Logger.info("User #{from} provided email as: #{body}")
 
         response = """
         Thank you, all your information has been securely saved!
+
+        Name: #{user.name}
+        Age: #{user.age}
+        Phone: #{user.phone}
+        Email: #{email_public}
 
         We will reach out to you with some forms to see how we can better serve you!
 
@@ -116,7 +135,8 @@ defmodule QlcDigital.MessageHandler do
         """
 
         send_message(from, response)
-        Redis.set(from <> ".current", step + 1)
+
+        Redis.hmset(create_key(from), %{user | "email" => email_public, step => step + 1})
 
       _ ->
         send_message(from, response)
@@ -167,5 +187,9 @@ defmodule QlcDigital.MessageHandler do
         Logger.error("HTTP request failed: #{reason}")
         :error
     end
+  end
+
+  defp create_key(key) do
+    key <> ".step"
   end
 end
