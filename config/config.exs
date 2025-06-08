@@ -8,3 +8,8 @@ import Config
 config :qlc_digital,
   port: 10000,
   host: "0.0.0.0"
+
+config :qlc_digital, :redis,
+  url: System.get_env("UPSTASH_REDIS_REST_URL"),
+  token: System.get_env("UPSTASH_REDIS_REST_TOKEN"),
+  namespace: System.get_env("QLC_NAMESPACE", "qlc_digital")

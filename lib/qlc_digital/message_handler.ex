@@ -1,11 +1,28 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
+  alias QlcDigital.Redis
+
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    case String.downcase(String.trim(body)) do
-      "hi" ->
+    case Redis.get(from <> ".current") do
+      {:ok, _} ->
+        manage_next_step(from, body)
+
+      step ->
+        case String.downcase(String.trim(body)) do
+          "hi" -> manage_next_step(from, body)
+          _ -> manage_next_step(from, body, step)
+        end
+    end
+  end
+
+  def manage_next_step(from, body, step \\ 0) do
+    response = "Thanks for your message! Say 'hi' to start a conversation."
+
+    case step do
+      0 ->
         response =
           """
           Hello!
@@ -22,26 +39,51 @@ defmodule QlcDigital.MessageHandler do
 
         question = "1. What is your name?"
         send_message(from, response)
+        Redis.set(from <> ".current", step + 1)
         send_message(from, question)
         Logger.info("Responded to 'hi' from #{from}")
 
-      name when name != "" ->
+      1 ->
         # Check if this might be a name response (simple heuristic)
+        name = body
+
         if String.contains?(name, ["my name is", "i am", "i'm"]) or
              (String.length(name) > 1 and String.length(name) < 50 and
                 not String.contains?(name, " ")) do
           Logger.info("User #{from} provided name: #{name}")
           response = "Nice to meet you, #{extract_name(name)}! Second, what is your age?"
           send_message(from, response)
+          Redis.set(from <> ".current", step + 1)
         else
-          # Generic response for other messages
-          response = "Say 'hi' to start a conversation."
-
           send_message(from, response)
         end
 
+      2 when is_integer(body) ->
+        # Check if this might be a name response (simple heuristic)
+        Logger.info("User #{from} provided age: #{body}")
+        response = "Thanks! Third, what is your email? Say NO if you do not have an email."
+        send_message(from, response)
+        Redis.set(from <> ".current", step + 1)
+
+      2 ->
+        Logger.info("User #{from} provided age as: #{body}")
+        response = "Please enter you age as a number (e.g. 18)"
+        send_message(from, response)
+
+      3 ->
+        Logger.info("User #{from} provided email as: #{body}")
+
+        response = """
+        Thank you, all your information has been securely saved!
+
+        We will reach out to you with some forms to see how we can better serve you!
+
+        Please note, if any of your information is wrong, send hi! This will restart the process so you can update your information!
+        """
+
+        send_message(from, response)
+        Redis.set(from <> ".current", step + 1)
       _ ->
-        response = "Say 'hi' to start a conversation."
         send_message(from, response)
     end
   end
