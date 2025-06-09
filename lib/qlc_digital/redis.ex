@@ -5,7 +5,6 @@ defmodule QlcDigital.Redis do
   @redis_config Application.compile_env(:qlc_digital, :redis, [])
   @url @redis_config[:url]
   @token @redis_config[:token]
-  @namespace @redis_config[:namespace] <> "."
 
   # REST API approach (recommended for serverless environments)
   def rest_command(command) do
@@ -14,8 +13,7 @@ defmodule QlcDigital.Redis do
       {"Content-Type", "application/json"}
     ]
 
-    key = command |> Enum.at(2)
-    body = Jason.encode!(command, ["EXPIRE", key, 3600])
+    body = Jason.encode!(command)
 
     case HTTPoison.post("#{@url}/", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
@@ -31,45 +29,45 @@ defmodule QlcDigital.Redis do
 
   # Convenience functions
   def get(key) do
-    rest_command(["GET", @namespace <> key])
+    rest_command(["GET", key])
   end
 
   def set(key, value, opts \\ []) do
-    cmd = ["SET", @namespace <> key, value] ++ build_set_options(opts)
+    cmd = ["SET", key, value] ++ build_set_options(opts)
     rest_command(cmd)
   end
 
   def del(key) do
-    rest_command(["DEL", @namespace <> key])
+    rest_command(["DEL", key])
   end
 
   def exists(key) do
-    rest_command(["EXISTS", @namespace <> key])
+    rest_command(["EXISTS", key])
   end
 
   def expire(key, seconds) do
-    rest_command(["EXPIRE", @namespace <> key, seconds])
+    rest_command(["EXPIRE", key, seconds])
   end
 
   def incr(key) do
-    rest_command(["INCR", @namespace <> key])
+    rest_command(["INCR", key])
   end
 
   def decr(key) do
-    rest_command(["DECR", @namespace <> key])
+    rest_command(["DECR", key])
   end
 
   # Hash operations
   def hget(key, field) do
-    rest_command(["HGET", @namespace <> key, field])
+    rest_command(["HGET", key, field])
   end
 
   def hset(key, field, value) do
-    rest_command(["HSET", @namespace <> key, field, value])
+    rest_command(["HSET", key, field, value])
   end
 
   def hgetall(key) do
-    rest_command(["HGETALL", @namespace <> key])
+    rest_command(["HGETALL", key])
   end
 
   def hgetall_as_map(key) do
@@ -125,40 +123,40 @@ defmodule QlcDigital.Redis do
 
   def hmset(key, field_values) when is_map(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-    rest_command(["HMSET", @namespace <> key] ++ args)
+    rest_command(["HMSET", key] ++ args ++ ["EXPIRE", key, 3600])
   end
 
   def hmset(key, field_values) when is_list(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-    rest_command(["HMSET", @namespace <> key] ++ args)
+    rest_command(["HMSET", key] ++ args)
   end
 
   # List operations
   def lpush(key, value) do
-    rest_command(["LPUSH", @namespace <> key, value])
+    rest_command(["LPUSH", key, value])
   end
 
   def rpop(key) do
-    rest_command(["RPOP", @namespace <> key])
+    rest_command(["RPOP", key])
   end
 
   # Set operations
   def sadd(key, member) do
-    rest_command(["SADD", @namespace <> key, member])
+    rest_command(["SADD", key, member])
   end
 
   def smembers(key) do
-    rest_command(["SMEMBERS", @namespace <> key])
+    rest_command(["SMEMBERS", key])
   end
 
   # JSON operations (if using RedisJSON)
   def json_set(key, path, value) do
     json_value = Jason.encode!(value)
-    rest_command(["JSON.SET", @namespace <> key, path, json_value])
+    rest_command(["JSON.SET", key, path, json_value])
   end
 
   def json_get(key, path \\ "$") do
-    case rest_command(["JSON.GET", @namespace <> key, path]) do
+    case rest_command(["JSON.GET", key, path]) do
       {:ok, json_string} when is_binary(json_string) ->
         Jason.decode(json_string)
 

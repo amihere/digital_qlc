@@ -3,6 +3,9 @@ defmodule QlcDigital.MessageHandler do
 
   alias QlcDigital.{User, Redis}
 
+  @redis_config Application.compile_env(:qlc_digital, :redis, [])
+  @namespace @redis_config[:namespace]
+
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
@@ -203,6 +206,6 @@ defmodule QlcDigital.MessageHandler do
   end
 
   defp get_hmap_key(key) do
-    key <> ".step"
+    "#{@namespace}.#{key}.step"
   end
 end
