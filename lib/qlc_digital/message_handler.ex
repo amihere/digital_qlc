@@ -16,7 +16,7 @@ defmodule QlcDigital.MessageHandler do
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
           {:ok, user} ->
             Logger.info(user)
-            step = :binary.decode_unsigned(user.step)
+            {step, _} = Integer.parse(user.step)
             manage_next_step(from, body, step)
 
           {:error, reason} ->
