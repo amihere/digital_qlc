@@ -15,14 +15,7 @@ defmodule QlcDigital.MessageHandler do
         # Find user. If they exist, resume else start from -
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
           {:ok, user} ->
-            case Integer.parse(user.step) do
-              {numberedStep, ""} ->
-                manage_next_step(from, body, numberedStep)
-
-              _ ->
-                Logger.error("Step was invalid")
-                manage_next_step(from, body)
-            end
+            manage_next_step(from, body, user.step)
 
           {:error, reason} ->
             Logger.info("The user #{from} is new")
