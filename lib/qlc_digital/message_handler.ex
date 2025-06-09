@@ -15,6 +15,7 @@ defmodule QlcDigital.MessageHandler do
         # Find user. If they exist, resume else start from -
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
           {:ok, user} ->
+            Logger.info(user)
             step = :binary.decode_unsigned(user.step)
             manage_next_step(from, body, step)
 
@@ -32,6 +33,8 @@ defmodule QlcDigital.MessageHandler do
 
   def manage_next_step(from, body, step \\ 0) do
     response = "Thanks for your message! Say 'hi' to start a conversation."
+
+    Logger.info("Current step #{step}")
 
     case step do
       0 ->
