@@ -14,7 +14,7 @@ defmodule QlcDigital.MessageHandler do
       _ ->
         # Find user. If they exist, resume else start from -
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
-          %{"result" => user} ->
+          {:ok, user} ->
             case Integer.parse(user.step) do
               {numberedStep, ""} ->
                 manage_next_step(from, body, numberedStep)
@@ -79,7 +79,9 @@ defmodule QlcDigital.MessageHandler do
           """
 
           send_message(from, response)
-          Redis.hmset(get_hmap_key(from), %{name => name, step => step + 1})
+
+          {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
+          Redis.hmset(get_hmap_key(from), struct(user, name: name, step: step + 1))
         else
           Logger.info("User #{from} provided name: #{name} #{body}")
           send_message(from, response)
@@ -101,8 +103,8 @@ defmodule QlcDigital.MessageHandler do
 
             send_message(from, response)
 
-            user = Redis.hgetall_as_struct(get_hmap_key(from), User)
-            Redis.hmset(get_hmap_key(from), %{user | age => age, step => step + 1})
+            {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
+            Redis.hmset(get_hmap_key(from), struct(user, age: age, step: step + 1))
 
           :error ->
             Logger.info("User #{from} provided age as: #{body}")
@@ -117,7 +119,7 @@ defmodule QlcDigital.MessageHandler do
             email -> email
           end
 
-        user = Redis.hgetall_as_struct(get_hmap_key(from), User)
+        {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
 
         Logger.info("User #{from} provided email as: #{body}")
 
@@ -136,7 +138,7 @@ defmodule QlcDigital.MessageHandler do
 
         send_message(from, response)
 
-        Redis.hmset(get_hmap_key(from), %{user | "email" => email_public, step => step + 1})
+        Redis.hmset(get_hmap_key(from), struct(user, email: email_public, step: step + 1))
 
       _ ->
         send_message(from, response)

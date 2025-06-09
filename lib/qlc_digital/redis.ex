@@ -18,7 +18,10 @@ defmodule QlcDigital.Redis do
 
     case HTTPoison.post("#{@url}/", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
-        Jason.decode!(response_body)
+        case Jason.decode!(response_body) do
+          %{"result" => value} -> {:ok, value}
+          other -> {:ok, other}
+        end
 
       {:error, reason} ->
         {:error, reason}
@@ -84,8 +87,8 @@ defmodule QlcDigital.Redis do
     end
   end
 
-  def hgetall_as_struct!(key, struct_module) do
-    case hgetall_as_struct(key, struct_module) do
+  def hgetall_as_struct!(key, struct_name) do
+    case hgetall_as_struct(key, struct_name) do
       {:ok, struct} ->
         struct
 
@@ -94,19 +97,12 @@ defmodule QlcDigital.Redis do
     end
   end
 
-  def hgetall_as_struct(key, struct_module) do
+  def hgetall_as_struct(key, struct_name) do
     case hgetall_as_map(key) do
       {:ok, map} ->
         # Convert string keys to atoms if needed
         try do
-          atom_map =
-            Map.new(map, fn {k, v} ->
-              atom_key = if is_binary(k), do: String.to_existing_atom(k), else: k
-              {atom_key, v}
-            end)
-
-          struct = struct(struct_module, atom_map)
-          {:ok, struct}
+          {:ok, struct(struct_name, map)}
         rescue
           ArgumentError ->
             {:error, :invalid_struct_keys}
