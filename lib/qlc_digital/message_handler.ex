@@ -148,7 +148,7 @@ defmodule QlcDigital.MessageHandler do
         # Push to Airtable
         client = AirtableClient.new("Signups")
 
-        {age, _} = user.age
+        {age, _} = Integer.parse(user.age)
 
         signup =
           Signup.new(%{
