@@ -14,7 +14,8 @@ defmodule QlcDigital.Redis do
       {"Content-Type", "application/json"}
     ]
 
-    body = Jason.encode!(command)
+    key = command |> Enum.at(2)
+    body = Jason.encode!(command, ["EXPIRE", key, 3600])
 
     case HTTPoison.post("#{@url}/", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
