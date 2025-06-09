@@ -78,7 +78,9 @@ defmodule QlcDigital.MessageHandler do
           send_message(from, response)
 
           {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
-          Redis.hmset(get_hmap_key(from), struct(user, name: name, step: step + 1))
+          user = struct(user, name: name, step: step + 1) |> Map.from_struct()
+
+          Redis.hmset(get_hmap_key(from), user)
         else
           Logger.info("User #{from} provided name: #{name} #{body}")
           send_message(from, response)
@@ -101,7 +103,9 @@ defmodule QlcDigital.MessageHandler do
             send_message(from, response)
 
             {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
-            Redis.hmset(get_hmap_key(from), struct(user, age: age, step: step + 1))
+            user = struct(user, age: age, step: step + 1) |> Map.from_struct()
+
+            Redis.hmset(get_hmap_key(from), user)
 
           :error ->
             Logger.info("User #{from} provided age as: #{body}")
@@ -135,7 +139,8 @@ defmodule QlcDigital.MessageHandler do
 
         send_message(from, response)
 
-        Redis.hmset(get_hmap_key(from), struct(user, email: email_public, step: step + 1))
+        user = struct(user, email: email_public, step: step + 1) |> Map.from_struct()
+        Redis.hmset(get_hmap_key(from), user)
 
       _ ->
         send_message(from, response)
