@@ -2,13 +2,14 @@ defmodule QlcDigital.Redis do
   @moduledoc """
   Redis client for Upstash integration
   """
+  require Logger
+
   @redis_config Application.compile_env(:qlc_digital, :redis, [])
   @url @redis_config[:url]
-  @pipeline_url @redis_config[:url]
   @token @redis_config[:token]
 
   # REST API approach (recommended for serverless environments)
-  def rest_command(command, pipeline \\ false) do
+  def rest_command(command) do
     headers = [
       {"Authorization", "Bearer #{@token}"},
       {"Content-Type", "application/json"}
@@ -16,18 +17,16 @@ defmodule QlcDigital.Redis do
 
     body = Jason.encode!(command)
 
-    url =
-      case pipeline do
-        false -> "#{@url}/"
-        true -> "#{@pipeline_url}/pipeline/"
-      end
-
-    case HTTPoison.post(url, body, headers) do
+    case HTTPoison.post("#{@url}/", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         case Jason.decode!(response_body) do
           %{"result" => value} -> {:ok, value}
           other -> {:ok, other}
         end
+
+      {:ok, %HTTPoison.Response{status_code: 400, body: response_body}} ->
+        Logger.error("Failed redis: #{response_body}")
+        {:error, "failed"}
 
       {:error, reason} ->
         {:error, reason}
@@ -130,9 +129,8 @@ defmodule QlcDigital.Redis do
 
   def hmset(key, field_values) when is_map(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-
-    command = [["HMSET", key] ++ args, ["EXPIRE", key, 3600]]
-    rest_command(command, true)
+    rest_command(["HMSET", key] ++ args)
+    expire(key, 3600)
   end
 
   def hmset(key, field_values) when is_list(field_values) do

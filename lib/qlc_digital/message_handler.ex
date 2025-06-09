@@ -18,7 +18,6 @@ defmodule QlcDigital.MessageHandler do
         # Find user. If they exist, resume else start from -
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
           {:ok, user} ->
-            Logger.info(user)
             {step, _} = Integer.parse(user.step)
             manage_next_step(from, body, step)
 
