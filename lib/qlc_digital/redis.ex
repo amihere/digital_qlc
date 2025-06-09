@@ -102,7 +102,13 @@ defmodule QlcDigital.Redis do
       {:ok, map} ->
         # Convert string keys to atoms if needed
         try do
-          {:ok, struct(struct_name, map)}
+          atom_map =
+            Map.new(map, fn {k, v} ->
+              atom_key = if is_binary(k), do: String.to_existing_atom(k), else: k
+              {atom_key, v}
+            end)
+
+          {:ok, struct(struct_name, atom_map)}
         rescue
           ArgumentError ->
             {:error, :invalid_struct_keys}

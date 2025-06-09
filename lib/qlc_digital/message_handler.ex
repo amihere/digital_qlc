@@ -15,7 +15,8 @@ defmodule QlcDigital.MessageHandler do
         # Find user. If they exist, resume else start from -
         case Redis.hgetall_as_struct(get_hmap_key(from), User) do
           {:ok, user} ->
-            manage_next_step(from, body, user.step)
+            step = :binary.decode_unsigned(user.step)
+            manage_next_step(from, body, step)
 
           {:error, reason} ->
             Logger.info("The user #{from} is new")
