@@ -90,7 +90,7 @@ defmodule QlcDigital.MessageHandler do
         Logger.info("User #{from} provided age: #{body}")
 
         case Integer.parse(body) do
-          {age, ""} ->
+          {age, ""} when age >= 18 ->
             response = """
             Thanks!
 
@@ -106,7 +106,7 @@ defmodule QlcDigital.MessageHandler do
 
             Redis.hmset(get_hmap_key(from), user)
 
-          :error ->
+          _ ->
             Logger.info("User #{from} provided age as: #{body}")
             response = "Please enter your age as a number (e.g. 18)"
             send_message(from, response)
@@ -126,10 +126,10 @@ defmodule QlcDigital.MessageHandler do
         response = """
         Thank you, all your information has been securely saved!
 
-        Name:   #{user.name}
-        Age:    #{user.age}
-        Phone:  #{user.phone}
-        Email:  #{email_public}
+        Name:  #{user.name}
+        Age:   #{user.age}
+        Phone: #{user.phone}
+        Email: #{email_public}
 
         We will reach out to you with some forms to see how we can better serve you!
 
