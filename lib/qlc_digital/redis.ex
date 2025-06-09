@@ -4,10 +4,11 @@ defmodule QlcDigital.Redis do
   """
   @redis_config Application.compile_env(:qlc_digital, :redis, [])
   @url @redis_config[:url]
+  @pipeline_url @redis_config[:url]
   @token @redis_config[:token]
 
   # REST API approach (recommended for serverless environments)
-  def rest_command(command) do
+  def rest_command(command, pipeline \\ false) do
     headers = [
       {"Authorization", "Bearer #{@token}"},
       {"Content-Type", "application/json"}
@@ -15,7 +16,13 @@ defmodule QlcDigital.Redis do
 
     body = Jason.encode!(command)
 
-    case HTTPoison.post("#{@url}/", body, headers) do
+    url =
+      case pipeline do
+        false -> "#{@url}/"
+        true -> "#{@pipeline_url}/pipeline/"
+      end
+
+    case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         case Jason.decode!(response_body) do
           %{"result" => value} -> {:ok, value}
@@ -123,7 +130,9 @@ defmodule QlcDigital.Redis do
 
   def hmset(key, field_values) when is_map(field_values) do
     args = Enum.flat_map(field_values, fn {field, value} -> [field, value] end)
-    rest_command(["HMSET", key] ++ args ++ ["EXPIRE", key, 3600])
+
+    command = [["HMSET", key] ++ args, ["EXPIRE", key, 3600]]
+    rest_command(command, true)
   end
 
   def hmset(key, field_values) when is_list(field_values) do
