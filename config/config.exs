@@ -9,6 +9,10 @@ config :qlc_digital,
   port: 10000,
   host: "0.0.0.0"
 
+config :qlc_digital, :airtable,
+  url: System.get_env("AIRTABLE_CLIENT_URL"),
+  token: System.get_env("AIRTABLE_CLIENT_TOKEN")
+
 config :qlc_digital, :redis,
   url: System.get_env("UPSTASH_REDIS_REST_URL"),
   token: System.get_env("UPSTASH_REDIS_REST_TOKEN"),

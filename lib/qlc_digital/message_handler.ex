@@ -1,7 +1,7 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
-  alias QlcDigital.{User, Redis}
+  alias QlcDigital.{User, Redis, Signup, AirtableClient}
 
   @redis_config Application.compile_env(:qlc_digital, :redis, [])
   @namespace @redis_config[:namespace]
@@ -144,6 +144,28 @@ defmodule QlcDigital.MessageHandler do
 
         user = struct(user, email: email_public, step: step + 1) |> Map.from_struct()
         Redis.hmset(get_hmap_key(from), user)
+
+        # Push to Airtable
+        client = AirtableClient.new("Signups")
+
+        {age, _} = user.age
+
+        signup =
+          Signup.new(%{
+            name: user.name,
+            email: user.email,
+            age: age,
+            phone_number: user.phone,
+            notes: "From the Whatsapp Bot"
+          })
+
+        case AirtableClient.create_record(client, Signup.to_airtable_fields(signup)) do
+          {:ok, _} ->
+            Logger.info("Persisted")
+
+          {:error, reason} ->
+            Logger.error("Failed to create Airtable record: #{reason}")
+        end
 
       _ ->
         send_message(from, response)
