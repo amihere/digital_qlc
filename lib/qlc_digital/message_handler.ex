@@ -65,8 +65,7 @@ defmodule QlcDigital.MessageHandler do
         name = body
 
         if String.contains?(name, ["my name is", "i am", "i'm"]) or
-             (String.length(name) > 1 and String.length(name) < 50 and
-                not String.contains?(name, " ")) do
+             (String.length(name) > 3 and String.length(name) < 100) do
           Logger.info("User #{from} provided name: #{name}")
 
           response = """
@@ -117,7 +116,7 @@ defmodule QlcDigital.MessageHandler do
         email_public =
           case body |> String.trim() |> String.downcase() do
             "no" -> "(empty)"
-            email -> email
+            _ -> body |> String.trim() |> down_first()
           end
 
         {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
@@ -127,14 +126,16 @@ defmodule QlcDigital.MessageHandler do
         response = """
         Thank you, all your information has been securely saved!
 
-        Name: #{user.name}
-        Age: #{user.age}
-        Phone: #{user.phone}
-        Email: #{email_public}
+        Name:   #{user.name}
+        Age:    #{user.age}
+        Phone:  #{user.phone}
+        Email:  #{email_public}
 
         We will reach out to you with some forms to see how we can better serve you!
 
-        Please note, if any of your information is wrong, send hi! This will restart the process so you can update your information!
+        Please note, if any of your information is wrong, send hi!
+
+        This will restart the process so you can update your information!
         """
 
         send_message(from, response)
@@ -191,6 +192,14 @@ defmodule QlcDigital.MessageHandler do
         Logger.error("HTTP request failed: #{reason}")
         :error
     end
+  end
+
+  defp down_first(<<first::utf8, rest::binary>>) do
+    String.downcase(<<first::utf8>>) <> rest
+  end
+
+  defp down_first("") do
+    ""
   end
 
   defp get_hmap_key(key) do
