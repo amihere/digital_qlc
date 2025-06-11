@@ -5,9 +5,12 @@ import Config
 # WHATSAPP_PHONE_ID=your_phone_number_id
 # VERIFY_TOKEN=your_webhook_verify_token
 # WEBHOOK_URL=https://your-domain.com/webhook
+
+{port, ""} = System.get_env("PORT", "10000") |> Integer.parse()
+
 config :qlc_digital,
-  port: 10000,
-  host: "0.0.0.0"
+  port: port,
+  host: System.get_env("HOST", "0.0.0.0")
 
 config :qlc_digital, :airtable,
   url: System.get_env("AIRTABLE_CLIENT_URL"),
