@@ -188,7 +188,7 @@ defmodule QlcDigital.MessageHandler do
   defp send_message(to, message) do
     config = QlcDigital.Config.get_config()
 
-    url = "https://graph.facebook.com/v22.0/#{config.whatsapp_phone_id}/messages"
+    url = "https://graph.facebook.com/v23.0/#{config.whatsapp_phone_id}/messages"
 
     headers = [
       {"Authorization", "Bearer #{config.whatsapp_token}"},
