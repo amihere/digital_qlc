@@ -32,6 +32,10 @@ defmodule QlcDigital.Question.Session do
     end
   end
 
+  def display_question(%{type: :text, text: text, options: []}) do
+    text
+  end
+
   def display_question(%{type: :choice, options: options} = question) do
     choices =
       options
@@ -85,27 +89,28 @@ defmodule QlcDigital.Question.Session do
     ]
 
     # Add conditional summary based on path taken
-    additional_info =
-      cond do
-        Map.has_key?(answers, "tech_experience") ->
-          [
-            "Interest: Technology",
-            "Experience: #{answers["tech_experience"]} years",
-            "Languages: #{Map.get(answers, "programming_languages", "None specified")}"
-          ]
+    # additional_info =
+    #   cond do
+    #     Map.has_key?(answers, "tech_experience") ->
+    #       [
+    #         "Interest: Technology",
+    #         "Experience: #{answers["tech_experience"]} years",
+    #         "Languages: #{Map.get(answers, "programming_languages", "None specified")}"
+    #       ]
+    #
+    #     Map.has_key?(answers, "art_type") ->
+    #       [
+    #         "Interest: Arts",
+    #         "Art Type: #{answers["art_type"]}",
+    #         "Experience: #{Map.get(answers, "art_years", "Not specified")}"
+    #       ]
+    #
+    #     true ->
+    #       ["Path: #{inspect(Map.keys(answers))}"]
+    #   end
+    # (summary_parts ++ additional_info)
 
-        Map.has_key?(answers, "art_type") ->
-          [
-            "Interest: Arts",
-            "Art Type: #{answers["art_type"]}",
-            "Experience: #{Map.get(answers, "art_years", "Not specified")}"
-          ]
-
-        true ->
-          ["Path: #{inspect(Map.keys(answers))}"]
-      end
-
-    (summary_parts ++ additional_info)
+    summary_parts
     |> Enum.join("\n")
   end
 

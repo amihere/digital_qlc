@@ -13,7 +13,7 @@ defmodule QlcDigital.Question.QuestionConfig do
   @default_questions %{}
 
   def start_link(_opts) do
-    Agent.start_link(fn -> @default_questions end, name: @agent_name)
+    Agent.start_link(fn -> load_from_file("questions.md") end, name: @agent_name)
   end
 
   def load_from_file(file_path) do
@@ -47,7 +47,7 @@ defmodule QlcDigital.Question.QuestionConfig do
   end
 
   def reload_default do
-    Agent.update(@agent_name, fn _ -> @default_questions end)
+    Agent.update(@agent_name, fn _ -> load_from_file("questions.md") end)
     :ok
   end
 

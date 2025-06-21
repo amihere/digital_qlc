@@ -38,11 +38,9 @@ defmodule QlcDigital.MessageHandler do
     response =
       case Session.get_current_question(conversation) do
         nil ->
-          Logger.info("in start")
           Session.get_summary(conversation)
 
         %{type: :summary} = summary ->
-          Logger.info("in summary")
           summary.text
 
         question ->
