@@ -8,8 +8,6 @@ defmodule QlcDigital.Application do
     host = Application.get_env(:qlc_digital, :host)
     redis_url = Application.get_env(:qlc_digital, :redis)[:url]
 
-    Logger.info(redis_url)
-
     children = [
       QlcDigital.Question.ConversationManager,
       QlcDigital.Question.QuestionConfig,

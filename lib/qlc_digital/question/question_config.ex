@@ -197,9 +197,7 @@ defmodule QlcDigital.Question.QuestionConfig do
     end
   end
 
-  @doc """
-  checks all the next links are valid
-  """
+  # checks all the next links are valid
   defp validate_question_references(questions) do
     question_ids = MapSet.new(Map.keys(questions))
 
