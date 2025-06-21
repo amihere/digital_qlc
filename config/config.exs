@@ -17,6 +17,11 @@ config :qlc_digital, :airtable,
   token: System.get_env("AIRTABLE_CLIENT_TOKEN")
 
 config :qlc_digital, :redis,
-  url: System.get_env("UPSTASH_REDIS_REST_URL"),
-  token: System.get_env("UPSTASH_REDIS_REST_TOKEN"),
+  url: System.get_env("UPSTASH_REDIS_URL"),
   namespace: System.get_env("QLC_NAMESPACE", "qlc_digital")
+
+config :qlc_digital, :whatsapp,
+  token: System.get_env("WHATSAPP_TOKEN"),
+  phone_id: System.get_env("WHATSAPP_PHONE_ID"),
+  verify: System.get_env("VERIFY_TOKEN"),
+  webhook_url: System.get_env("WEBHOOK_URL")

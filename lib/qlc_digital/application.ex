@@ -6,16 +6,18 @@ defmodule QlcDigital.Application do
   def start(_type, _args) do
     port = Application.get_env(:qlc_digital, :port)
     host = Application.get_env(:qlc_digital, :host)
+    redis_url = Application.get_env(:qlc_digital, :redis)[:url]
 
     children = [
-      {
-        Plug.Cowboy,
-        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]
-      }
+      QlcDigital.Question.ConversationManager,
+      QlcDigital.Question.QuestionConfig,
+      {Redix, redis_url, name: :redix},
+      {Plug.Cowboy,
+       scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]}
     ]
 
     opts = [strategy: :one_for_one, name: QlcDigital.Supervisor]
-    Logger.info("Starting the QLC Digital Bot on port #{port} and host #{host}")
+    Logger.info("Starting the Eli Bot on port #{port} and host #{host}")
     Supervisor.start_link(children, opts)
   end
 

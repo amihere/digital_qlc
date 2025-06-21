@@ -1,6 +1,6 @@
 defmodule QlcDigital.AirtableClient do
   @moduledoc """
-  Redis client for Airtable
+  API client for Airtable
   """
   require Logger
 
