@@ -86,27 +86,28 @@ defmodule QlcDigital.Question.QuestionConfig do
   end
 
   def get_start_question do
-    questions = get_all_questions()
-    # Find the question that has no incoming references (is not a "next" target)
-    all_next_targets =
-      questions
-      |> Map.values()
-      |> Enum.flat_map(fn q ->
-        case q.next do
-          nil -> []
-          next when is_binary(next) -> [next]
-          # Skip function-based next for this analysis
-          _func -> []
-        end
-      end)
-      |> MapSet.new()
+    # questions = get_all_questions()
+    # # Find the question that has no incoming references (is not a "next" target)
+    # all_next_targets =
+    #   questions
+    #   |> Map.values()
+    #   |> Enum.flat_map(fn q ->
+    #     case q.next do
+    #       nil -> []
+    #       next when is_binary(next) -> [next]
+    #       # Skip function-based next for this analysis
+    #       _func -> []
+    #     end
+    #   end)
+    #   |> MapSet.new()
+    #
+    # start_question =
+    #   questions
+    #   |> Map.keys()
+    #   |> Enum.find(fn id -> not MapSet.member?(all_next_targets, id) end)
 
-    start_question =
-      questions
-      |> Map.keys()
-      |> Enum.find(fn id -> not MapSet.member?(all_next_targets, id) end)
-
-    get_question(start_question || "start")
+    # get_question(start_question || "start")
+    get_question("start")
   end
 
   def reload_default do
@@ -259,6 +260,9 @@ defmodule QlcDigital.Question.QuestionConfig do
     end
   end
 
+  @doc """
+  checks all the next links are valid
+  """
   defp validate_question_references(questions) do
     question_ids = MapSet.new(Map.keys(questions))
 
@@ -274,7 +278,13 @@ defmodule QlcDigital.Question.QuestionConfig do
             if MapSet.member?(question_ids, next) do
               []
             else
-              [next]
+              vals = String.split(" -> ")
+              last = List.last(vals)
+
+              [last | vals]
+              |> Enum.filter(&String.contains?(&1, ","))
+              |> Enum.map(&(String.split(&1, ", ") |> List.first()))
+              |> Enum.filter(&MapSet.member?(question_ids, &1))
             end
 
           # Skip function validation
@@ -290,7 +300,7 @@ defmodule QlcDigital.Question.QuestionConfig do
     end
   end
 
-  def export_to_markdown(file_path \\ "questions.md") do
+  def export_to_markdown(file_path \\ "exported_questions.md") do
     questions = get_all_questions()
 
     content =
