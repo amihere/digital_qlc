@@ -14,7 +14,7 @@ defmodule QlcDigital.Router do
     case conn.params do
       %{
         "hub.mode" => "subscribe",
-        "hub.verify_token" => ^@verify_token,
+        "hub.verify_token" => @verify_token,
         "hub.challenge" => challenge
       } ->
         Logger.info("Webhook verified successfully")
