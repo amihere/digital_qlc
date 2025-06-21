@@ -3,6 +3,8 @@ defmodule QlcDigital.Question.Conversation do
   Represents a conversation state with answers and current question.
   """
 
+  @derive Jason.Encoder
+
   defstruct [
     :session_id,
     :current_question_id,

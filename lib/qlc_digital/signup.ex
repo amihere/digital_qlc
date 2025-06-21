@@ -3,6 +3,8 @@ defmodule QlcDigital.Signup do
   Signup module to allow AirtableClient to store this
   """
 
+  @derive Jason.Encoder
+
   defstruct [:name, :phone_number, :email, :age, :notes]
 
   def new(attrs \\ %{}) do
