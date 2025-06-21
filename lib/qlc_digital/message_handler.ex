@@ -1,200 +1,56 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
-  alias QlcDigital.{User, Redis, Signup, AirtableClient}
+  alias QlcDigital.Question.Session
 
-  @redis_config Application.compile_env(:qlc_digital, :redis, [])
-  @namespace @redis_config[:namespace]
+  @whatsapp Application.compile_env(:qlc_digital, :whatsapp, [])
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    # Hi overrides all previous progress
-    case String.downcase(String.trim(body)) do
-      "hi" ->
-        manage_next_step(from, body)
-
-      _ ->
-        # Find user. If they exist, resume else start from -
-        case Redis.hgetall_as_struct(get_hmap_key(from), User) do
-          {:ok, user} ->
-            {step, _} = Integer.parse(user.step)
-            manage_next_step(from, body, step)
-
-          {:error, reason} ->
-            Logger.info("The user #{from} is new")
-            Logger.error("Could not find user #{reason}")
-            manage_next_step(from, body)
-        end
-    end
+    start_or_resume(from, body)
   end
 
   def handle_message(message) do
     Logger.info("Received non-text message: #{inspect(message)}")
   end
 
-  def manage_next_step(from, body, step \\ 0) do
-    response = "Thanks for your message! Say 'hi' to start a conversation."
+  def start_or_resume(from, body) do
+    Logger.info("Current message #{body}")
+    default_message = "Say hi, and try again"
 
-    Logger.info("Current step #{step}")
+    # use phone as session id
+    case Session.start_session(from) do
+      {:ok, :new, conversation} ->
+        send_message(:parse_question, from, conversation)
 
-    case step do
-      0 ->
-        response =
-          """
-          Hello!
-          Welcome to the Sister Check-In Circle Program!
+      {:ok, :resumed, conversation} ->
+        send_message(:parse_question, from, conversation)
 
-          This Program is designed to help new and expectant mothers who may be experiencing anxiety,
-          depression, or simply need additional support during this critical time in their lives.
-
-          The program connects mothers with trained facilitators and peer support
-          groups via WhatsApp, providing convenient access to mental health resources and community support.
-
-          If you are interested in joining this program, we would like to ask a few questions.
-          """
-
-        question = "1. What is your name?"
-        send_message(from, response)
-        send_message(from, question)
-
-        Logger.info("Responded to 'hi' from #{from}")
-        user = %User{:phone => from, :step => step + 1}
-        Redis.hmset(get_hmap_key(from), user |> Map.from_struct())
-
-      1 ->
-        # Check if this might be a name response (simple heuristic)
-        name = body
-
-        if String.contains?(name, ["my name is", "i am", "i'm"]) or
-             (String.length(name) > 3 and String.length(name) < 100) do
-          Logger.info("User #{from} provided name: #{name}")
-
-          response = """
-          Nice to meet you, #{extract_name(name)}!
-
-          2. What is your age?
-          """
-
-          send_message(from, response)
-
-          {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
-          user = struct(user, name: name, step: step + 1) |> Map.from_struct()
-
-          Redis.hmset(get_hmap_key(from), user)
-        else
-          Logger.info("User #{from} provided name: #{name} #{body}")
-          send_message(from, response)
-        end
-
-      2 when is_binary(body) ->
-        # Check if this might be a name response (simple heuristic)
-        Logger.info("User #{from} provided age: #{body}")
-
-        case Integer.parse(body) do
-          {age, ""} when age >= 18 ->
-            response = """
-            Thanks!
-
-            3. What is your email?
-
-            (Say NO if you don't have one)
-            """
-
-            send_message(from, response)
-
-            {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
-            user = struct(user, age: age, step: step + 1) |> Map.from_struct()
-
-            Redis.hmset(get_hmap_key(from), user)
-
-          _ ->
-            Logger.info("User #{from} provided age as: #{body}")
-            response = "Please enter your age as a number (e.g. 18)"
-            send_message(from, response)
-        end
-
-      3 ->
-        email_public =
-          case body |> String.trim() |> String.downcase() do
-            "no" -> "(empty)"
-            _ -> body |> String.trim() |> down_first()
-          end
-
-        {:ok, user} = Redis.hgetall_as_struct(get_hmap_key(from), User)
-
-        Logger.info("User #{from} provided email as: #{body}")
-
-        response = """
-        Thank you, all your information has been securely saved!
-
-        Name:  #{user.name}
-        Age:   #{user.age}
-        Phone: #{user.phone}
-        Email: #{email_public}
-
-        We will reach out to you with some forms to see how we can better serve you!
-
-        Please note, if any of your information is wrong, send hi!
-
-        This will restart the process so you can update your information!
-        """
-
-        send_message(from, response)
-
-        user = struct(user, email: email_public, step: step + 1) |> Map.from_struct()
-        Redis.hmset(get_hmap_key(from), user)
-
-        # Push to Airtable
-        client = AirtableClient.new("Signups")
-
-        {age, _} = Integer.parse(user.age)
-
-        signup =
-          Signup.new(%{
-            name: user.name,
-            email: user.email,
-            age: age,
-            phone_number: user.phone,
-            notes: "From the Whatsapp Bot"
-          })
-
-        case AirtableClient.create_record(client, Signup.to_airtable_fields(signup)) do
-          {:ok, _} ->
-            Logger.info("Persisted")
-
-          {:error, reason} ->
-            Logger.error("Failed to create Airtable record: #{reason}")
-        end
-
-      _ ->
-        send_message(from, response)
+      {:error, reason} ->
+        Logger.error(reason)
+        send_message(from, default_message)
     end
   end
 
-  defp extract_name(text) do
-    text
-    |> String.downcase()
-    |> String.replace(~r/my name is |i am |i'm /, "")
-    |> String.trim()
-    |> String.split()
-    |> List.first()
-    |> case do
-      nil -> "friend"
-      name -> String.capitalize(name)
-    end
+  # unwrangle message
+  defp send_message(:parse_question, to, conversation) do
+    response =
+      case Session.get_current_question(conversation) do
+        nil ->
+          Session.get_summary(conversation)
+
+        %{type: :summary} = summary ->
+          summary.text
+
+        question ->
+          Session.display_question(question)
+      end
+
+    send_message(to, response)
   end
 
   defp send_message(to, message) do
-    config = QlcDigital.Config.get_config()
-
-    url = "https://graph.facebook.com/v23.0/#{config.whatsapp_phone_id}/messages"
-
-    headers = [
-      {"Authorization", "Bearer #{config.whatsapp_token}"},
-      {"Content-Type", "application/json"}
-    ]
-
     body =
       Jason.encode!(%{
         messaging_product: "whatsapp",
@@ -202,6 +58,13 @@ defmodule QlcDigital.MessageHandler do
         type: "text",
         text: %{body: message}
       })
+
+    url = "https://graph.facebook.com/v23.0/#{@whatsapp[:phone_id]}/messages"
+
+    headers = [
+      {"Authorization", "Bearer #{@whatsapp[:token]}"},
+      {"Content-Type", "application/json"}
+    ]
 
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200}} ->
@@ -216,17 +79,5 @@ defmodule QlcDigital.MessageHandler do
         Logger.error("HTTP request failed: #{reason}")
         :error
     end
-  end
-
-  defp down_first(<<first::utf8, rest::binary>>) do
-    String.downcase(<<first::utf8>>) <> rest
-  end
-
-  defp down_first("") do
-    ""
-  end
-
-  defp get_hmap_key(key) do
-    "#{@namespace}.#{key}.step"
   end
 end
