@@ -17,7 +17,6 @@ defmodule QlcDigital.MessageHandler do
 
   def start_or_resume(from, body) do
     Logger.info("Current message #{body}")
-    default_message = "Say hi, and try again"
 
     # use phone as session id
     case Session.start_session(from) do
@@ -29,6 +28,7 @@ defmodule QlcDigital.MessageHandler do
 
       {:error, reason} ->
         Logger.error(reason)
+        default_message = "Say hi, and try again"
         send_message(from, default_message)
     end
   end
@@ -38,15 +38,18 @@ defmodule QlcDigital.MessageHandler do
     response =
       case Session.get_current_question(conversation) do
         nil ->
+          Logger.info("in start")
           Session.get_summary(conversation)
 
         %{type: :summary} = summary ->
+          Logger.info("in summary")
           summary.text
 
         question ->
           Session.display_question(question)
       end
 
+    Logger.info(response)
     send_message(to, response)
   end
 
