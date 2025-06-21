@@ -5,6 +5,11 @@ defmodule QlcDigital.Question.QuestionConfig do
   Can load from hardcoded config or from markdown files.
   """
 
+  use Agent
+
+  # State to hold loaded questions
+  @agent_name __MODULE__
+
   @default_questions %{
     "start" => %{
       id: "start",
@@ -12,29 +17,29 @@ defmodule QlcDigital.Question.QuestionConfig do
       type: :text,
       next: "age"
     },
-    "age" => %{
-      id: "age",
-      text: "Hi {name}! How old are you?",
-      type: :number,
-      next: fn answers ->
-        age = String.to_integer(answers["age"])
-        if age >= 18, do: "interests_adult", else: "interests_youth"
-      end
-    },
-    "interests_adult" => %{
-      id: "interests_adult",
-      text: "What are you most interested in?",
-      type: :choice,
-      options: ["Technology", "Arts", "Sports", "Business"],
-      next: fn answers ->
-        case answers["interests_adult"] do
-          "Technology" -> "tech_experience"
-          "Arts" -> "art_type"
-          "Sports" -> "sport_type"
-          "Business" -> "business_type"
-        end
-      end
-    },
+    # "age" => %{
+    #   id: "age",
+    #   text: "Hi {name}! How old are you?",
+    #   type: :number,
+    #   next: fn answers ->
+    #     age = String.to_integer(answers["age"])
+    #     if age >= 18, do: "interests_adult", else: "interests_youth"
+    #   end
+    # },
+    # "interests_adult" => %{
+    #   id: "interests_adult",
+    #   text: "What are you most interested in?",
+    #   type: :choice,
+    #   options: ["Technology", "Arts", "Sports", "Business"],
+    #   next: fn answers ->
+    #     case answers["interests_adult"] do
+    #       "Technology" -> "tech_experience"
+    #       "Arts" -> "art_type"
+    #       "Sports" -> "sport_type"
+    #       "Business" -> "business_type"
+    #     end
+    #   end
+    # },
     "sport_frequency" => %{
       id: "sport_frequency",
       text: "How often do you play/watch sports?",
@@ -50,10 +55,7 @@ defmodule QlcDigital.Question.QuestionConfig do
     }
   }
 
-  # State to hold loaded questions
-  @agent_name __MODULE__
-
-  def start_link do
+  def start_link(_opts) do
     Agent.start_link(fn -> @default_questions end, name: @agent_name)
   end
 
