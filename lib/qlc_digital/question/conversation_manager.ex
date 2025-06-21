@@ -6,6 +6,8 @@ defmodule QlcDigital.Question.ConversationManager do
   use GenServer
   alias QlcDigital.Question.Conversation
 
+  @namespace Application.compile_env(:qlc_digital, :redis, [])[:namespace]
+
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -33,13 +35,18 @@ defmodule QlcDigital.Question.ConversationManager do
 
   # Server callbacks
   def handle_call({:save, conversation}, _from, state) do
-    key = "conversation:#{conversation.session_id}"
+    key = "#{@namespace}::conversation:#{conversation.session_id}"
     data = Jason.encode!(conversation)
 
     case Redix.command(:redix, ["SET", key, data]) do
       {:ok, "OK"} ->
         # Also add to sessions set for listing
-        Redix.command(:redix, ["SADD", "conversations:sessions", conversation.session_id])
+        Redix.command(:redix, [
+          "SADD",
+          "#{@namespace}::conversations:sessions",
+          conversation.session_id
+        ])
+
         {:reply, :ok, state}
 
       {:error, reason} ->
@@ -48,7 +55,7 @@ defmodule QlcDigital.Question.ConversationManager do
   end
 
   def handle_call({:load, session_id}, _from, state) do
-    key = "conversation:#{session_id}"
+    key = "#{@namespace}::conversation:#{session_id}"
 
     case Redix.command(:redix, ["GET", key]) do
       {:ok, nil} ->
@@ -70,17 +77,18 @@ defmodule QlcDigital.Question.ConversationManager do
   end
 
   def handle_call(:list_sessions, _from, state) do
-    case Redix.command(:redix, ["SMEMBERS", "conversations:sessions"]) do
+    case Redix.command(:redix, ["SMEMBERS", "#{@namespace}::conversations:sessions"]) do
       {:ok, sessions} -> {:reply, {:ok, sessions}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
 
   def handle_call({:delete, session_id}, _from, state) do
-    key = "conversation:#{session_id}"
+    key = "#{@namespace}conversation:#{session_id}"
 
     with {:ok, _} <- Redix.command(:redix, ["DEL", key]),
-         {:ok, _} <- Redix.command(:redix, ["SREM", "conversations:sessions", session_id]) do
+         {:ok, _} <-
+           Redix.command(:redix, ["SREM", "#{@namespace}::conversations:sessions", session_id]) do
       {:reply, :ok, state}
     else
       {:error, reason} -> {:reply, {:error, reason}, state}

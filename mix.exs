@@ -22,7 +22,7 @@ defmodule QlcDigital.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:redix, "~> 1.2"},
+      {:redix, "~> 1.5.2"},
       {:httpoison, "~> 2.0"},
       {:jason, "~> 1.4"},
       {:plug_cowboy, "~> 2.6"},

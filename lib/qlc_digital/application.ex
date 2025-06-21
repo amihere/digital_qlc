@@ -8,10 +8,13 @@ defmodule QlcDigital.Application do
     host = Application.get_env(:qlc_digital, :host)
     redis_url = Application.get_env(:qlc_digital, :redis)[:url]
 
+    Logger.info(redis_url)
+
     children = [
       QlcDigital.Question.ConversationManager,
       QlcDigital.Question.QuestionConfig,
-      {Redix, {redis_url, [name: :redix]}},
+      # TODO: remove ssl laxness
+      {Redix, {redis_url, [ssl: true, socket_opts: [verify: :verify_none], name: :redix]}},
       {Plug.Cowboy,
        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]}
     ]
