@@ -10,50 +10,7 @@ defmodule QlcDigital.Question.QuestionConfig do
   # State to hold loaded questions
   @agent_name __MODULE__
 
-  @default_questions %{
-    "start" => %{
-      id: "start",
-      text: "Welcome! What's your name?",
-      type: :text,
-      next: "age"
-    },
-    # "age" => %{
-    #   id: "age",
-    #   text: "Hi {name}! How old are you?",
-    #   type: :number,
-    #   next: fn answers ->
-    #     age = String.to_integer(answers["age"])
-    #     if age >= 18, do: "interests_adult", else: "interests_youth"
-    #   end
-    # },
-    # "interests_adult" => %{
-    #   id: "interests_adult",
-    #   text: "What are you most interested in?",
-    #   type: :choice,
-    #   options: ["Technology", "Arts", "Sports", "Business"],
-    #   next: fn answers ->
-    #     case answers["interests_adult"] do
-    #       "Technology" -> "tech_experience"
-    #       "Arts" -> "art_type"
-    #       "Sports" -> "sport_type"
-    #       "Business" -> "business_type"
-    #     end
-    #   end
-    # },
-    "sport_frequency" => %{
-      id: "sport_frequency",
-      text: "How often do you play/watch sports?",
-      type: :choice,
-      options: ["Daily", "Weekly", "Monthly", "Occasionally"],
-      next: "summary"
-    },
-    "summary" => %{
-      id: "summary",
-      text: "Thank you for sharing! Here's what I learned about you:",
-      type: :summary,
-      next: nil
-    }
-  }
+  @default_questions %{}
 
   def start_link(_opts) do
     Agent.start_link(fn -> @default_questions end, name: @agent_name)
@@ -86,27 +43,6 @@ defmodule QlcDigital.Question.QuestionConfig do
   end
 
   def get_start_question do
-    # questions = get_all_questions()
-    # # Find the question that has no incoming references (is not a "next" target)
-    # all_next_targets =
-    #   questions
-    #   |> Map.values()
-    #   |> Enum.flat_map(fn q ->
-    #     case q.next do
-    #       nil -> []
-    #       next when is_binary(next) -> [next]
-    #       # Skip function-based next for this analysis
-    #       _func -> []
-    #     end
-    #   end)
-    #   |> MapSet.new()
-    #
-    # start_question =
-    #   questions
-    #   |> Map.keys()
-    #   |> Enum.find(fn id -> not MapSet.member?(all_next_targets, id) end)
-
-    # get_question(start_question || "start")
     get_question("start")
   end
 
@@ -182,6 +118,7 @@ defmodule QlcDigital.Question.QuestionConfig do
     end
   end
 
+  # Get all the extra values in the text
   defp parse_attributes(lines) do
     lines
     |> Enum.reduce(%{}, fn line, acc ->

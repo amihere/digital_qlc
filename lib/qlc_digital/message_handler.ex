@@ -1,30 +1,53 @@
 defmodule QlcDigital.MessageHandler do
   require Logger
 
+  alias QlcDigital.Question.Session
+
   @whatsapp Application.compile_env(:qlc_digital, :whatsapp, [])
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
 
-    # Here we route the user's messages
-    case String.downcase(String.trim(body)) do
-      "hi" ->
-        manage_next_step(from, body)
-
-      _ ->
-        nil
-    end
+    start_or_resume(from, body)
   end
 
   def handle_message(message) do
     Logger.info("Received non-text message: #{inspect(message)}")
   end
 
-  def manage_next_step(from, body, step \\ 0) do
+  def start_or_resume(from, body) do
     Logger.info("Current message #{body}")
+    default_message = "Say hi, and try again"
 
-    response = "Thanks for your message! Say 'hi' to start a conversation."
-    send_message(from, response)
+    # use phone as session id
+    case Session.start_session(from) do
+      {:ok, :new, conversation} ->
+        send_message(:parse_question, from, conversation)
+
+      {:ok, :resumed, conversation} ->
+        send_message(:parse_question, from, conversation)
+
+      {:error, reason} ->
+        Logger.error(reason)
+        send_message(from, default_message)
+    end
+  end
+
+  # unwrangle message
+  defp send_message(:parse_question, to, conversation) do
+    response =
+      case Session.get_current_question(conversation) do
+        nil ->
+          Session.get_summary(conversation)
+
+        %{type: :summary} = summary ->
+          summary.text
+
+        question ->
+          Session.display_question(question)
+      end
+
+    send_message(to, response)
   end
 
   defp send_message(to, message) do

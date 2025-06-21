@@ -32,6 +32,15 @@ defmodule QlcDigital.Question.Session do
     end
   end
 
+  def display_question(%{type: :choice, options: options} = question) do
+    choices =
+      options
+      |> Enum.with_index(1)
+      |> Enum.flat_map(fn {option, index} -> "\n#{index} #{option}" end)
+
+    "#{question.text}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
+  end
+
   def answer_question(%Conversation{} = conversation, answer) do
     current_question = QuestionConfig.get_question(conversation.current_question_id)
 
@@ -90,20 +99,6 @@ defmodule QlcDigital.Question.Session do
             "Interest: Arts",
             "Art Type: #{answers["art_type"]}",
             "Experience: #{Map.get(answers, "art_years", "Not specified")}"
-          ]
-
-        Map.has_key?(answers, "sport_type") ->
-          [
-            "Interest: Sports",
-            "Favorite Sport: #{answers["sport_type"]}",
-            "Frequency: #{Map.get(answers, "sport_frequency", "Not specified")}"
-          ]
-
-        Map.has_key?(answers, "game_type") ->
-          [
-            "Interest: Gaming",
-            "Game Type: #{answers["game_type"]}",
-            "Hours per week: #{Map.get(answers, "gaming_hours", "Not specified")}"
           ]
 
         true ->
