@@ -11,7 +11,7 @@ defmodule QlcDigital.Application do
     children = [
       QlcDigital.Question.ConversationManager,
       QlcDigital.Question.QuestionConfig,
-      {Redix, redis_url, name: :redix},
+      {Redix, {redis_url, [name: :redix]}},
       {Plug.Cowboy,
        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]}
     ]
