@@ -832,11 +832,11 @@ If crisis language is detected, immediately route to emergency support:
 
 ## crisis_resources
 
-**Question:** Here are people who can help right now: Crisis Text Line: Text HOME to 741741, National Suicide Prevention Lifeline: 988, If you're in immediate danger: Call 911 or go to your nearest emergency room. I'm also still here if you want to keep talking while you reach out to them.
+**Question:** If you're in immediate danger: Call 0800678678 or go to your nearest emergency room. I'm also still here if you want to keep talking while you reach out to them.
 
 **Type:** choice
 
-**Options:** Talk to someone now, Stay here with Eli, I need a moment
+**Options:** Talk to someone now, Stay here with Eli, Let me think about it
 
 **Next:** summary
 
@@ -844,7 +844,7 @@ If crisis language is detected, immediately route to emergency support:
 
 ## crisis_checkin
 
-**Question:** I'm still here if you need to talk. If you're in immediate danger, please contact 988 or someone nearby you trust. You matter, and there are people who want to help.
+**Question:** I'm still here if you need to talk. If you're in immediate danger, please contact 0800678678 or someone nearby you trust. You matter, and there are people who want to help.
 
 **Type:** summary
 
