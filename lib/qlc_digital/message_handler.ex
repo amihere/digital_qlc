@@ -24,6 +24,8 @@ defmodule QlcDigital.MessageHandler do
         send_message(:parse_question, from, conversation)
 
       {:ok, :resumed, conversation} ->
+        answer = body
+        Session.answer_question(conversation, answer)
         send_message(:parse_question, from, conversation)
 
       {:error, reason} ->
