@@ -73,11 +73,6 @@ defmodule QlcDigital.Question.QuestionConfig do
     get_question("start")
   end
 
-  def reload_default do
-    Agent.update(@agent_name, fn _ -> @default_questions end)
-    :ok
-  end
-
   # Markdown parsing functions
   def parse_markdown_questions(content) do
     try do
