@@ -12,17 +12,33 @@ defmodule QlcDigital.Question.QuestionConfig do
 
   @default_questions %{}
 
-  def start_link(_opts) do
-    Agent.start_link(fn -> load_from_file("questions.md") end, name: @agent_name)
+  def start_link(opts \\ []) do
+    file_path = Keyword.get(opts, :file_path)
+
+    initial_state =
+      case file_path do
+        nil ->
+          %{}
+
+        path ->
+          case load_questions_from_file(path) do
+            {:ok, questions} ->
+              questions
+
+            {:error, _reason} ->
+              %{}
+          end
+      end
+
+    Agent.start_link(fn -> initial_state end, name: @agent_name)
   end
 
-  def load_from_file(file_path) do
+  defp load_questions_from_file(file_path) do
     case File.read(file_path) do
       {:ok, content} ->
         case parse_markdown_questions(content) do
           {:ok, questions} ->
-            Agent.update(@agent_name, fn _ -> questions end)
-            {:ok, map_size(questions)}
+            {:ok, questions}
 
           {:error, reason} ->
             {:error, reason}
@@ -30,6 +46,17 @@ defmodule QlcDigital.Question.QuestionConfig do
 
       {:error, reason} ->
         {:error, {:file_error, reason}}
+    end
+  end
+
+  def load_from_file(file_path) do
+    case load_questions_from_file(file_path) do
+      {:ok, questions} ->
+        Agent.update(@agent_name, fn _ -> questions end)
+        {:ok, map_size(questions)}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -47,7 +74,7 @@ defmodule QlcDigital.Question.QuestionConfig do
   end
 
   def reload_default do
-    Agent.update(@agent_name, fn _ -> load_from_file("questions.md") end)
+    Agent.update(@agent_name, fn _ -> @default_questions end)
     :ok
   end
 
