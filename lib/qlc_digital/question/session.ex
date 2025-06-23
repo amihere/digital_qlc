@@ -82,32 +82,11 @@ defmodule QlcDigital.Question.Session do
     answers = conversation.answers
 
     summary_parts = [
-      "Name: #{Map.get(answers, "name", "N/A")}",
+      "Name: #{Map.get(answers, "start", "N/A")}",
       "Age: #{Map.get(answers, "age", "N/A")}",
-      "Location: #{Map.get(answers, "location", "N/A")}",
-      "Phone: #{Map.get(answers, "phone", "N/A")}"
+      "Location: #{Map.get(answers, "location", "N/A")}"
     ]
 
-    # Add conditional summary based on path taken
-    # additional_info =
-    #   cond do
-    #     Map.has_key?(answers, "tech_experience") ->
-    #       [
-    #         "Interest: Technology",
-    #         "Experience: #{answers["tech_experience"]} years",
-    #         "Languages: #{Map.get(answers, "programming_languages", "None specified")}"
-    #       ]
-    #
-    #     Map.has_key?(answers, "art_type") ->
-    #       [
-    #         "Interest: Arts",
-    #         "Art Type: #{answers["art_type"]}",
-    #         "Experience: #{Map.get(answers, "art_years", "Not specified")}"
-    #       ]
-    #
-    #     true ->
-    #       ["Path: #{inspect(Map.keys(answers))}"]
-    #   end
     # (summary_parts ++ additional_info)
 
     summary_parts
