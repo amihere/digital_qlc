@@ -4,15 +4,25 @@
 
 **Type:** text
 
-**Next:** location_age
+**Next:** location
 
 ---
 
-## location_age
+## location
 
-**Question:** Nice to meet you, {name}. I'm here to listen and support however feels right for you. Can you tell me roughly where you're located and your age? This just helps me connect you with local resources if you'd like them later.
+**Question:** Nice to meet you, {name}. I'm here to listen and support however feels right for you. Can you tell me roughly where you're located? This just helps me connect you with local resources if you'd like them later.
 
 **Type:** text
+
+**Next:** age
+
+---
+
+## age
+
+**Question:** Thank you, {name}. And, how old are you?
+
+**Type:** number
 
 **Next:** cultural_background
 
