@@ -127,10 +127,10 @@ defmodule QlcDigital.Question.Session do
   end
 
   defp validate_answer(%{type: :choice, options: options}, answer) when is_binary(answer) do
-    if answer in options do
-      {:ok, answer}
-    else
-      {:error, "Please choose from: #{Enum.join(options, ", ")}"}
+    cond do
+      answer in options -> {:ok, answer}
+      answer in (1..Enum.count(options) |> Enum.map(&Integer.to_string(&1))) -> {:ok, answer}
+      true -> {:error, "Please choose from: #{Enum.join(1..Enum.count(options), ", ")}"}
     end
   end
 
