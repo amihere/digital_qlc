@@ -33,7 +33,11 @@ defmodule QlcDigital.Question.Session do
   end
 
   defp format_text(text) do
-    text |> String.replace(". ", "\n\n ") |> String.replace("? ", "\n\n ")
+    text |> String.replace(". ", ".\n\n ") |> String.replace("? ", "?\n\n ")
+  end
+
+  def display_question(%{type: :number, text: text, options: []}) do
+    format_text(text)
   end
 
   def display_question(%{type: :text, text: text, options: []}) do
