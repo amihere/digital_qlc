@@ -32,25 +32,29 @@ defmodule QlcDigital.Question.Session do
     end
   end
 
-  defp format_text(text) do
-    text |> String.replace(". ", ".\n\n ") |> String.replace("? ", "?\n\n ")
+  defp format_text(text, answers) do
+    text
+    |> String.replace(". ", ".\n\n ")
+    |> String.replace("? ", "?\n\n ")
+    |> String.replace("{name}", "#{Map.get(answers, "start", "friend")}")
   end
 
-  def display_question(%{type: :number, text: text, options: []}) do
-    format_text(text)
+  def display_question(%{type: :number, text: text, options: []}, answers) do
+    format_text(text, answers)
   end
 
-  def display_question(%{type: :text, text: text, options: []}) do
-    format_text(text)
+  def display_question(%{type: :text, text: text, options: []}, answers) do
+    format_text(text, answers)
   end
 
-  def display_question(%{type: :choice, options: options} = question) do
+  def display_question(%{type: :choice, options: options} = question, answers) do
     choices =
       options
       |> Enum.with_index(1)
       |> Enum.map(fn {option, index} -> "\n#{index} #{option}" end)
 
-    "#{format_text(question.text)}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
+    text = format_text(question.text, answers)
+    "#{text}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
   end
 
   def answer_question(%Conversation{} = conversation, answer) do

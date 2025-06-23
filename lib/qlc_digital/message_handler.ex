@@ -67,7 +67,7 @@ defmodule QlcDigital.MessageHandler do
           summary.text
 
         question ->
-          Session.display_question(question)
+          Session.display_question(question, conversation.answers)
       end
 
     Logger.info(response)
