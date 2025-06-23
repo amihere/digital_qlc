@@ -32,8 +32,12 @@ defmodule QlcDigital.Question.Session do
     end
   end
 
+  defp format_text(text) do
+    text |> String.replace(". ", "\n\n ") |> String.replace("? ", "\n\n ")
+  end
+
   def display_question(%{type: :text, text: text, options: []}) do
-    text
+    format_text(text)
   end
 
   def display_question(%{type: :choice, options: options} = question) do
@@ -42,7 +46,7 @@ defmodule QlcDigital.Question.Session do
       |> Enum.with_index(1)
       |> Enum.map(fn {option, index} -> "\n#{index} #{option}" end)
 
-    "#{question.text}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
+    "#{format_text(question.text)}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
   end
 
   def answer_question(%Conversation{} = conversation, answer) do
