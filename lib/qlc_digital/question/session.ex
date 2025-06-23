@@ -40,7 +40,7 @@ defmodule QlcDigital.Question.Session do
     choices =
       options
       |> Enum.with_index(1)
-      |> Enum.flat_map(fn {option, index} -> "\n#{index} #{option}" end)
+      |> Enum.map(fn {option, index} -> "\n#{index} #{option}" end)
 
     "#{question.text}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
   end
