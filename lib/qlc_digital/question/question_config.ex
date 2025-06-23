@@ -10,8 +10,6 @@ defmodule QlcDigital.Question.QuestionConfig do
   # State to hold loaded questions
   @agent_name __MODULE__
 
-  @default_questions %{}
-
   def start_link(opts \\ []) do
     file_path = Keyword.get(opts, :file_path)
 
