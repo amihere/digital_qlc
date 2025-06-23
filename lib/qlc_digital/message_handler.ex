@@ -16,22 +16,43 @@ defmodule QlcDigital.MessageHandler do
   end
 
   def start_or_resume(from, body) do
-    Logger.info("Current message #{body}")
-
     # use phone as session id
     case Session.start_session(from) do
       {:ok, :new, conversation} ->
+        Logger.debug("#{from} starting new conversation")
         send_message(:parse_question, from, conversation)
 
       {:ok, :resumed, conversation} ->
+        Logger.debug("#{from} resumes their conversation")
         answer = body
-        Session.answer_question(conversation, answer)
-        send_message(:parse_question, from, conversation)
+
+        # This handles the response from answering
+        case answer_question(conversation, answer) do
+          {:ok, update} ->
+            send_message(:parse_question, from, update)
+
+          {:error, response} ->
+            # validation error message
+            send_message(:meta, from, response)
+            send_message(:parse_question, from, conversation)
+        end
 
       {:error, reason} ->
-        Logger.error(reason)
-        default_message = "Say hi, and try again"
-        send_message(from, default_message)
+        Logger.error("#{from} could not continue for this reason: #{reason}")
+        send_message(:meta, from, "A small hiccup.. let us try again.")
+    end
+  end
+
+  defp answer_question(conversation, answer) do
+    case Session.answer_question(conversation, answer) do
+      {:ok, conversation_update} ->
+        {:ok, conversation_update}
+
+      {:error, :invalid_question} ->
+        {:error, "Kindly start again by sending hi."}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -50,10 +71,10 @@ defmodule QlcDigital.MessageHandler do
       end
 
     Logger.info(response)
-    send_message(to, response)
+    send_message(:meta, to, response)
   end
 
-  defp send_message(to, message) do
+  defp send_message(:meta, to, message) do
     body =
       Jason.encode!(%{
         messaging_product: "whatsapp",
