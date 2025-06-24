@@ -189,25 +189,27 @@ defmodule QlcDigital.Question.QuestionConfig do
           if age >= 18, do: "interests_adult", else: "interests_youth"
         end
 
-      String.contains?(condition_str, "interests_adult") ->
-        fn answers ->
-          case Map.get(answers, "interests_adult") do
-            "Technology" -> "tech_experience"
-            "Arts" -> "art_type"
-            "Sports" -> "sport_type"
-            "Business" -> "business_type"
-            _ -> "summary"
-          end
-        end
+      String.contains?(condition_str, "case") ->
+        regex = ~r"->\s*([^,]+)"
+        tag = String.split(condition_str, ":") |> Enum.at(0) |> String.split() |> Enum.at(1)
 
-      String.contains?(condition_str, "interests_youth") ->
+        routes =
+          Regex.scan(regex, condition_str, capture: :all_but_first)
+          |> Enum.map(fn [value] ->
+            # Trim whitespace from the extracted value
+            String.trim(value)
+          end)
+
         fn answers ->
-          case Map.get(answers, "interests_youth") do
-            "Video Games" -> "game_type"
-            "Reading" -> "book_genre"
-            "Sports" -> "sport_type"
-            "Music" -> "music_instrument"
-            _ -> "summary"
+          case Map.get(answers, tag) do
+            item when not is_nil(item) ->
+              case Integer.parse(item) do
+                {i, _} -> Enum.at(routes, i - 1, nil)
+                _ -> nil
+              end
+
+            nil ->
+              nil
           end
         end
 

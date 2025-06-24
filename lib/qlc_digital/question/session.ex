@@ -36,8 +36,8 @@ defmodule QlcDigital.Question.Session do
     name = Map.get(answers, "start") || Map.get(answers, :start, "friend")
 
     text
-    |> String.replace(". ", ".\n\n ")
-    |> String.replace("? ", "?\n\n ")
+    |> String.replace(". ", ".\n\n")
+    |> String.replace("? ", "?\n\n")
     |> String.replace("{name}", name)
   end
 
