@@ -33,10 +33,12 @@ defmodule QlcDigital.Question.Session do
   end
 
   defp format_text(text, answers) do
+    name = Map.get(answers, "start") || Map.get(answers, :start, "friend")
+
     text
     |> String.replace(". ", ".\n\n ")
     |> String.replace("? ", "?\n\n ")
-    |> String.replace("{name}", "#{Map.get(answers, "start", "friend")}")
+    |> String.replace("{name}", name)
   end
 
   def display_question(%{type: :number, text: text, options: []}, answers) do
