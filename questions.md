@@ -124,11 +124,9 @@
 
 ## overwhelm_wellbeing
 
-**Question:** Thank you for sharing that. When days feel heavy, it helps to pause. On a scale of 1 to 10, how would you say your overall wellbeing has been this past week?
+**Question:** Thank you for sharing that. When days feel heavy, it helps to pause. On a scale of 1 to 10, how would you say your overall wellbeing has been this past week? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** overwhelm_explore
 
@@ -196,11 +194,9 @@
 
 ## postpartum_disconnection
 
-**Question:** That can be such a lonely feeling—especially when everyone expects you to be smiling. You're not alone. If you don't mind me asking, on a scale of 1-10, how has your overall wellbeing felt this past week?
+**Question:** That can be such a lonely feeling—especially when everyone expects you to be smiling. You're not alone. If you don't mind me asking, on a scale of 1-10, how has your overall wellbeing felt this past week? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
 **Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
 **Next:** postpartum_duration
 
@@ -314,11 +310,9 @@
 
 ## pregnancy_loss
 
-**Question:** I'm so sorry. There are no perfect words, but I'm here. However you're feeling—sad, numb, angry—it all belongs. If it's okay to ask, how would you rate your overall wellbeing this past week, from 1-10?
+**Question:** I'm so sorry. There are no perfect words, but I'm here. However you're feeling—sad, numb, angry—it all belongs. If it's okay to ask, how would you rate your overall wellbeing this past week, from 1-10? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** loss_talk_offer
 
@@ -410,11 +404,9 @@
 
 ## nicu_stress
 
-**Question:** That's so much to hold. Many moms feel like they're suspended between hope and fear. If you don't mind sharing, how would you rate your overall wellbeing this past week, from 1-10?
+**Question:** That's so much to hold. Many moms feel like they're suspended between hope and fear. If you don't mind sharing, how would you rate your overall wellbeing this past week, from 1-10? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** nicu_talk_offer
 
@@ -492,11 +484,9 @@
 
 ## anxiety_support
 
-**Question:** That sounds exhausting—like your body's on high alert. If you don't mind me asking, how would you rate your overall wellbeing this past week, from 1-10?
+**Question:** That sounds exhausting—like your body's on high alert. If you don't mind me asking, how would you rate your overall wellbeing this past week, from 1-10? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** anxiety_tension_check
 
@@ -576,11 +566,9 @@
 
 ## infertility_support
 
-**Question:** That's such a long time to carry hope. Whatever you're feeling is valid. If it's okay to ask, how would you rate your overall wellbeing this past week, from 1-10?
+**Question:** That's such a long time to carry hope. Whatever you're feeling is valid. If it's okay to ask, how would you rate your overall wellbeing this past week, from 1-10? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** infertility_feelings_offer
 
@@ -660,11 +648,9 @@
 
 ## health_scare_identity
 
-**Question:** That makes so much sense. Sometimes recovery starts when the treatment ends. If you don't mind sharing, how would you rate your overall wellbeing this past week, from 1-10?
+**Question:** That makes so much sense. Sometimes recovery starts when the treatment ends. If you don't mind sharing, how would you rate your overall wellbeing this past week, from 1-10? 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
 
-**Type:** choice
-
-**Options:** 1-3 really struggling, 4-6 getting by, 7-10 doing okay overall
+**Type:** number
 
 **Next:** identity_reflection_offer
 
