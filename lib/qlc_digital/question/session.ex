@@ -99,15 +99,11 @@ defmodule QlcDigital.Question.Session do
     age = Map.get(answers, "age") || Map.get(answers, :age) || "N/A"
     location = Map.get(answers, "location") || Map.get(answers, :location) || "N/A"
 
-    summary_parts = [
+    [
       "Name: #{name}",
       "Age: #{age}",
       "Location: #{location}"
     ]
-
-    # (summary_parts ++ additional_info)
-
-    summary_parts
     |> Enum.join("\n")
   end
 
