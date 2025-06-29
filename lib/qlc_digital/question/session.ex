@@ -114,9 +114,14 @@ defmodule QlcDigital.Question.Session do
   end
 
   defp validate_answer(%{type: :number}, answer) when is_binary(answer) do
-    case Integer.parse(answer) do
-      {number, ""} -> {:ok, to_string(number)}
-      _ -> {:error, "Please enter a valid number"}
+    # TODO: remove skip to property
+    if String.downcase(answer) == "skip" do
+      {:ok, ""}
+    else
+      case Integer.parse(answer) do
+        {number, ""} -> {:ok, to_string(number)}
+        _ -> {:error, "Please enter a valid number"}
+      end
     end
   end
 
