@@ -850,7 +850,7 @@ If crisis language is detected, immediately route to emergency support:
 
 ## welcome
 
-**Question:** Hello! Welcome to the Sister Check-In Circle Program!\nThis Program is designed to help new and expectant mothers who may be experiencing anxiety,\ndepression, or simply need additional support during this critical time in their lives. \nThe program connects mothers with trained facilitators and peer support\ngroups via WhatsApp, providing convenient access to mental health resources and community support.\nIf you are interested in joining this program, we would like to ask a few questions.
+**Question:** Hello! Welcome to the Sister Check-In Circle Program!\nThis Program is designed to help new and expectant mothers who may be experiencing anxiety,\ndepression, or simply need additional support during this critical time in their lives. \nThe program connects mothers with trained facilitators and peer support\ngroups via WhatsApp, providing convenient access to mental health resources and community support.\nIf you are interested in joining this program, do note that we will ask a few personal questions. Feel free to answer them, and skip any you may be uncomfortable with.
 
 **Type:** summary
 

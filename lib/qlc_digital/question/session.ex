@@ -12,8 +12,9 @@ defmodule QlcDigital.Question.Session do
 
       {:error, :not_found} ->
         conversation = Conversation.new(session_id)
+        welcome = Conversation.new(session_id, "welcome")
         :ok = ConversationManager.save_conversation(conversation)
-        {:ok, :new, conversation}
+        {:ok, :new, [initial: welcome, q: conversation]}
 
       {:error, reason} ->
         {:error, reason}

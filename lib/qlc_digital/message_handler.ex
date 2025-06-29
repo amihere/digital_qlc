@@ -18,8 +18,9 @@ defmodule QlcDigital.MessageHandler do
   def start_or_resume(from, body) do
     # use phone as session id
     case Session.start_session(from) do
-      {:ok, :new, conversation} ->
+      {:ok, :new, [initial: welcome, q: conversation]} ->
         Logger.debug("#{from} starting new conversation")
+        send_message(:parse_question, from, welcome)
         send_message(:parse_question, from, conversation)
 
       {:ok, :resumed, conversation} ->

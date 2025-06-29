@@ -23,12 +23,12 @@ defmodule QlcDigital.Question.Conversation do
           completed: boolean()
         }
 
-  def new(session_id) do
+  def new(session_id, current \\ "start") do
     now = DateTime.utc_now()
 
     %__MODULE__{
       session_id: session_id,
-      current_question_id: "start",
+      current_question_id: current,
       answers: %{},
       started_at: now,
       updated_at: now,
