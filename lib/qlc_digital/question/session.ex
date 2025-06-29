@@ -105,6 +105,7 @@ defmodule QlcDigital.Question.Session do
       "Age: #{age}",
       "Location: #{location}"
     ]
+    |> Enum.reject(&String.match?(&1, ~r/.*: $/))
     |> Enum.join("\n")
   end
 
