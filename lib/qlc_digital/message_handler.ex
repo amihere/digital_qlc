@@ -65,7 +65,7 @@ defmodule QlcDigital.MessageHandler do
           Session.get_summary(conversation)
 
         %{type: :summary} = summary ->
-          summary.text
+          summary.text |> String.replace("\\n", "\n")
 
         question ->
           Session.display_question(question, conversation.answers)
