@@ -5,7 +5,7 @@ defmodule QlcDigital.Signup do
 
   @derive Jason.Encoder
 
-  defstruct [:name, :phone_number, :email, :age, :notes]
+  defstruct [:name, :phone_number, :email, :location, :age, :notes]
 
   def new(attrs \\ %{}) do
     struct(__MODULE__, attrs)
@@ -17,6 +17,7 @@ defmodule QlcDigital.Signup do
       email: signup.email,
       age: signup.age,
       phone_number: signup.phone_number,
+      location: signup.location,
       notes: signup.notes
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
@@ -31,6 +32,7 @@ defmodule QlcDigital.Signup do
       email: fields[:email],
       age: fields[:age],
       phone_number: fields[:phone_number],
+      location: fields[:location],
       notes: fields[:notes]
     }
   end
