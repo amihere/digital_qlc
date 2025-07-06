@@ -39,6 +39,45 @@ defmodule QlcDigital.AirtableClient do
     end
   end
 
+  def upsert_record(%__MODULE__{} = client, phone_number, fields) do
+    case find_by_phone_number(client, phone_number) do
+      {:ok, nil} ->
+        create_record(client, fields)
+
+      {:ok, record} ->
+        record_id = record["id"]
+        update_record(client, record_id, fields)
+    end
+  end
+
+  def find_by_phone_number(%__MODULE__{} = client, phone_number) do
+    headers = build_headers()
+
+    filter_formula = "{Phone_Number} = '#{phone_number}'"
+    url = "#{build_url(client)}?filterByFormula=#{URI.encode(filter_formula)}"
+
+    case HTTPoison.get(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
+        case Jason.decode!(response_body) do
+          {:ok, %{"records" => []}} ->
+            {:ok, nil}
+
+          {:ok, %{"records" => [record | _]}} ->
+            {:ok, record}
+
+          {:error, decode_error} ->
+            Logger.error(decode_error)
+            {:error, "Could not decode json"}
+        end
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
+        {:error, {status_code, Jason.decode!(response_body)}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   # Get a record by ID
   def get_record(%__MODULE__{} = client, record_id) do
     url = build_url(client, record_id)
