@@ -53,16 +53,16 @@ defmodule QlcDigital.AirtableClient do
   def find_by_phone_number(%__MODULE__{} = client, phone_number) do
     headers = build_headers()
 
-    filter_formula = "{Phone_Number} = '#{phone_number}'"
+    filter_formula = "'Phone Number' = #{phone_number}"
     url = "#{build_url(client)}?filterByFormula=#{URI.encode(filter_formula)}"
 
     case HTTPoison.get(url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         case Jason.decode!(response_body) do
-          {:ok, %{"records" => []}} ->
+          %{"records" => []} ->
             {:ok, nil}
 
-          {:ok, %{"records" => [record | _]}} ->
+          %{"records" => [record | _]} ->
             {:ok, record}
 
           {:error, decode_error} ->
