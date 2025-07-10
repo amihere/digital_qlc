@@ -10,7 +10,7 @@ defmodule QlcDigital.Application do
 
     children = [
       QlcDigital.Question.ConversationManager,
-      {QlcDigital.Question.QuestionConfig, [file_path: "questions.md"]},
+      {QlcDigital.Question.QuestionConfig, [file_path: "new_questions.md"]},
       # TODO: remove ssl laxness
       {Redix, {redis_url, [ssl: true, socket_opts: [verify: :verify_none], name: :redix]}},
       {Plug.Cowboy,
