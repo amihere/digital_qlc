@@ -96,9 +96,9 @@ defmodule QlcDigital.Question.Session do
   def get_summary(%Conversation{} = conversation) do
     answers = conversation.answers
 
-    name = Map.get(answers, "start") || Map.get(answers, :start) || "N/A"
-    age = Map.get(answers, "age") || Map.get(answers, :age) || "N/A"
-    location = Map.get(answers, "location") || Map.get(answers, :location) || "N/A"
+    name = Map.get(answers, "start") || Map.get(answers, :start)
+    age = Map.get(answers, "age") || Map.get(answers, :age)
+    location = Map.get(answers, "location") || Map.get(answers, :location)
 
     [
       "Name: #{name}",
