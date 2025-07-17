@@ -17,7 +17,7 @@ defmodule QlcDigital.MessageHandler do
 
   def start_or_resume(from, body) do
     # use phone as session id
-    case Session.start_session(from) do
+    case Session.start_session(from, body) do
       {:ok, :new, [initial: welcome, q: conversation]} ->
         Logger.debug("#{from} starting new conversation")
         send_message(:parse_question, from, welcome)
@@ -62,7 +62,7 @@ defmodule QlcDigital.MessageHandler do
     response =
       case Session.get_current_question(conversation) do
         nil ->
-          Session.get_summary(conversation)
+          "Thank you for engaging in this initial release"
 
         %{type: :summary} = summary ->
           summary.text |> String.replace("\\n", "\n")
