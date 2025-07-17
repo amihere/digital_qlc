@@ -93,22 +93,6 @@ defmodule QlcDigital.Question.Session do
     end
   end
 
-  def get_summary(%Conversation{} = conversation) do
-    answers = conversation.answers
-
-    name = Map.get(answers, "start") || Map.get(answers, :start)
-    age = Map.get(answers, "age") || Map.get(answers, :age)
-    location = Map.get(answers, "location") || Map.get(answers, :location)
-
-    [
-      "Name: #{name}",
-      "Age: #{age}",
-      "Location: #{location}"
-    ]
-    |> Enum.reject(&String.match?(&1, ~r/.*: $/))
-    |> Enum.join("\n")
-  end
-
   # Private functions
   defp validate_answer(%{type: :text}, answer) when is_binary(answer) and answer != "" do
     {:ok, String.trim(answer)}
