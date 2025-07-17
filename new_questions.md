@@ -93,7 +93,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** Okay, mama. Wherever you are, just get comfortable. If it feels okay, you can place a hand over your heart. Now, just silently repeat this phrase to yourself: "This is a hard moment. All mothers have hard moments. May I be kind to myself right now." That's it. Just a little bit of warmth for yourself. Rest well. I'm here when you're ready.
 **Type:** text
-**Next:** nil
+**Next:** fin
 
 ---
 
@@ -101,7 +101,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** Understood. Rest well, mama. I'm here when you're ready.
 **Type:** text
-**Next:** nil
+**Next:** fin
 
 ---
 
@@ -208,7 +208,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** Thank you. Please reach out to them now.
 **Type:** text
-**Next:** nil
+**Next:** fin
 
 ---
 
@@ -332,15 +332,15 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** Thank you for your time and trust today. Take care of yourself, mama.
 **Type:** text
-**Next:** nil
+**Next:** fin
 
 ---
 
-## nil
+## fin
 
 **Question:** Thank you for your time and trust today. What would you like to do next?
 **Type:** choice
 **Options:** Start again, Stay
-**Next:** case sad_disconnected_intro: Start again -> start, Stay -> nil
+**Next:** case sad_disconnected_intro: Start again -> start, Stay -> fin
 
 ---
