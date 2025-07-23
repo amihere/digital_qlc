@@ -50,7 +50,7 @@ defmodule QlcDigital.MessageHandler do
         {:ok, conversation_update}
 
       {:error, :invalid_question} ->
-        {:error, "Kindly start again by sending hi."}
+        {:error, "Kindly restart by saying `eli stop`."}
 
       {:error, reason} ->
         {:error, reason}

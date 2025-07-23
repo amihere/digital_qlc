@@ -6,16 +6,17 @@ defmodule QlcDigital.Question.Session do
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
 
   def start_session(session_id, answer) do
-    case ConversationManager.load_conversation(session_id) do
-      {:ok, %{next: nil} = conversation} ->
-        if String.match?(String.downcase(answer), ~r/hi/) do
-          new_conversation = Conversation.new(session_id, "parenthood_stage")
-          :ok = ConversationManager.save_conversation(new_conversation)
-          {:ok, :resumed, new_conversation}
-        else
-          {:ok, :resumed, conversation}
-        end
+    if String.match?(String.downcase(answer), ~r/^eli stop$/) do
+      new_conversation = Conversation.new(session_id, "parenthood_stage")
+      :ok = ConversationManager.save_conversation(new_conversation)
+      {:ok, :resumed, new_conversation}
+    else
+      _start_session(session_id)
+    end
+  end
 
+  defp _start_session(session_id) do
+    case ConversationManager.load_conversation(session_id) do
       {:ok, conversation} ->
         {:ok, :resumed, conversation}
 
