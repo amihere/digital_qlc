@@ -21,9 +21,23 @@ defmodule QlcDigital.Question.Session do
   end
 
   def start_session(session_id, answer) do
+    answer = String.downcase(answer) |> String.trim()
+
     cond do
-      String.match?(String.downcase(answer), ~r/^eli stop$/) ->
+      String.match?(answer, ~r/^eli stop$/) ->
         reroute(session_id, "parenthood_stage")
+
+      String.match?(answer, ~r/^eli return$/) ->
+        {:ok, conversation} = ConversationManager.load_conversation(session_id)
+
+        key =
+          Map.get(conversation, "answers")
+          |> Map.keys()
+          |> Enum.sort()
+          |> Enum.drop(-1)
+          |> List.last()
+
+        reroute(session_id, key)
 
       true ->
         _start_session(session_id)
