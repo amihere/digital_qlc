@@ -5,13 +5,28 @@ defmodule QlcDigital.Question.Session do
 
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
 
+  # override the current user's flow
+  defp reroute(session_id, stage) do
+    case ConversationManager.load_conversation(session_id) do
+      {:ok, conversation} ->
+        updated_conversation = Map.put(conversation, "current_question_id", stage)
+
+        :ok = ConversationManager.save_conversation(updated_conversation)
+        {:ok, :resumed, updated_conversation}
+
+      # rerouting was not possible
+      _ ->
+        _start_session(session_id)
+    end
+  end
+
   def start_session(session_id, answer) do
-    if String.match?(String.downcase(answer), ~r/^eli stop$/) do
-      new_conversation = Conversation.new(session_id, "parenthood_stage")
-      :ok = ConversationManager.save_conversation(new_conversation)
-      {:ok, :resumed, new_conversation}
-    else
-      _start_session(session_id)
+    cond do
+      String.match?(String.downcase(answer), ~r/^eli stop$/) ->
+        reroute(session_id, "parenthood_stage")
+
+      true ->
+        _start_session(session_id)
     end
   end
 
