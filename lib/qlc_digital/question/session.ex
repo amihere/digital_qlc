@@ -27,14 +27,15 @@ defmodule QlcDigital.Question.Session do
       String.match?(answer, ~r/^eli stop$/) ->
         reroute(session_id, "parenthood_stage")
 
+      String.match?(answer, ~r/^eli restart$/) ->
+        reroute(session_id, "start")
+
       String.match?(answer, ~r/^eli return$/) ->
         {:ok, conversation} = ConversationManager.load_conversation(session_id)
 
         key =
           Map.get(conversation, "answers")
           |> Map.keys()
-          |> Enum.sort()
-          |> Enum.drop(-1)
           |> List.last()
 
         reroute(session_id, key)
