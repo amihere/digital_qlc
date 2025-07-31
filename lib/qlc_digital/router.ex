@@ -1,8 +1,8 @@
 defmodule QlcDigital.Router do
   use Plug.Router
   require Logger
-
-  @verify_token Application.compile_env(:qlc_digital, :whatsapp, [])[:verify]
+  
+  alias QlcDigital.WhatsappClient
 
   plug(Plug.Logger)
   plug(:match)
@@ -11,10 +11,12 @@ defmodule QlcDigital.Router do
 
   # Webhook verification endpoint
   get "/webhook" do
+    verify_token = WhatsappClient.get_verify_token()
+    
     case conn.params do
       %{
         "hub.mode" => "subscribe",
-        "hub.verify_token" => @verify_token,
+        "hub.verify_token" => ^verify_token,
         "hub.challenge" => challenge
       } ->
         Logger.info("Webhook verified successfully")

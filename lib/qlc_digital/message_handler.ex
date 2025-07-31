@@ -2,8 +2,7 @@ defmodule QlcDigital.MessageHandler do
   require Logger
 
   alias QlcDigital.Question.Session
-
-  @whatsapp Application.compile_env(:qlc_digital, :whatsapp, [])
+  alias QlcDigital.WhatsappClient
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
@@ -76,33 +75,6 @@ defmodule QlcDigital.MessageHandler do
   end
 
   defp send_message(:meta, to, message) do
-    body =
-      Jason.encode!(%{
-        messaging_product: "whatsapp",
-        to: to,
-        type: "text",
-        text: %{body: message}
-      })
-
-    url = "https://graph.facebook.com/v23.0/#{@whatsapp[:phone_id]}/messages"
-
-    headers = [
-      {"Authorization", "Bearer #{@whatsapp[:token]}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    case HTTPoison.post(url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200}} ->
-        Logger.info("Message sent successfully to #{to}")
-        :ok
-
-      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        Logger.error("Failed to send message. Status: #{status_code}, Body: #{response_body}")
-        :error
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        Logger.error("HTTP request failed: #{reason}")
-        :error
-    end
+    WhatsappClient.send_message(to, message)
   end
 end
