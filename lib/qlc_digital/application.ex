@@ -8,11 +8,12 @@ defmodule QlcDigital.Application do
     host = Application.get_env(:qlc_digital, :host)
     redis_config = Application.get_env(:qlc_digital, :redis, [])
     redis_url = redis_config[:url]
+    whatsapp_config = Application.get_env(:qlc_digital, :whatsapp, [])
 
     base_children = [
       QlcDigital.Question.ConversationManager,
       {QlcDigital.Question.QuestionConfig, [file_path: "new_questions.md"]},
-      QlcDigital.WhatsappClient,
+      {QlcDigital.WhatsappClient, [config: whatsapp_config]},
       {Plug.Cowboy,
        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]}
     ]

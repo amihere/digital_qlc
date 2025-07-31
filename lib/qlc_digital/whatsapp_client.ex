@@ -9,14 +9,14 @@ defmodule QlcDigital.WhatsappClient do
 
   @agent_name __MODULE__
 
-  def start_link(_opts) do
-    whatsapp_config = Application.get_env(:qlc_digital, :whatsapp, [])
+  def start_link(opts) do
+    config = Keyword.get(opts, :config, %{})
     
     initial_state = %{
-      token: whatsapp_config[:token],
-      phone_id: whatsapp_config[:phone_id],
-      verify_token: whatsapp_config[:verify],
-      webhook_url: whatsapp_config[:webhook_url]
+      token: config[:token],
+      phone_id: config[:phone_id],
+      verify_token: config[:verify_token],
+      webhook_url: config[:webhook_url]
     }
 
     Agent.start_link(fn -> initial_state end, name: @agent_name)
