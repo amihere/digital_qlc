@@ -2,7 +2,9 @@ defmodule QlcDigital.Router do
   use Plug.Router
   require Logger
   
-  alias QlcDigital.WhatsappClient
+  defp whatsapp_client_module do
+    Application.get_env(:qlc_digital, :whatsapp_client_module, QlcDigital.WhatsappClient)
+  end
 
   plug(Plug.Logger)
   plug(:match)
@@ -11,7 +13,7 @@ defmodule QlcDigital.Router do
 
   # Webhook verification endpoint
   get "/webhook" do
-    verify_token = WhatsappClient.get_verify_token()
+    verify_token = whatsapp_client_module().get_verify_token()
     
     case conn.params do
       %{

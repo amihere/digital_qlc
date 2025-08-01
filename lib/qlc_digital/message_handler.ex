@@ -2,7 +2,10 @@ defmodule QlcDigital.MessageHandler do
   require Logger
 
   alias QlcDigital.Question.Session
-  alias QlcDigital.WhatsappClient
+
+  defp whatsapp_client_module do
+    Application.get_env(:qlc_digital, :whatsapp_client_module, QlcDigital.WhatsappClient)
+  end
 
   def handle_message(%{"from" => from, "text" => %{"body" => body}, "id" => message_id}) do
     Logger.info("Received message [#{message_id}] from #{from}: #{body}")
@@ -75,6 +78,8 @@ defmodule QlcDigital.MessageHandler do
   end
 
   defp send_message(:meta, to, message) do
-    WhatsappClient.send_message(to, message)
+    client_module = whatsapp_client_module()
+    Logger.debug("Using WhatsApp client module: #{inspect(client_module)}")
+    client_module.send_message(to, message)
   end
 end

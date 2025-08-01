@@ -9,10 +9,10 @@ defmodule QlcDigital.Question.Session do
   defp reroute(session_id, stage) do
     case ConversationManager.load_conversation(session_id) do
       {:ok, conversation} ->
-        updated_conversation = Map.put(conversation, "current_question_id", stage)
+        updated_conversation = Map.put(conversation, :current_question_id, stage)
 
         :ok = ConversationManager.save_conversation(updated_conversation)
-        {:ok, :resumed, updated_conversation}
+        {:ok, :new, [initial: %Conversation{}, q: updated_conversation]}
 
       # rerouting was not possible
       _ ->

@@ -4,6 +4,25 @@ defmodule QlcDigital.Application do
 
   @impl true
   def start(_type, _args) do
+    if Mix.env() == :test do
+      start_test_environment()
+    else
+      start_production_environment()
+    end
+  end
+
+  defp start_test_environment do
+    port = Application.get_env(:qlc_digital, :test_port, 4001)
+    _host = "127.0.0.1"
+    
+    children = QlcDigital.Test.TestConfig.get_test_children()
+    
+    opts = [strategy: :one_for_one, name: QlcDigital.Supervisor]
+    Logger.info("Starting Eli Bot in TEST mode on port #{port}")
+    Supervisor.start_link(children, opts)
+  end
+
+  defp start_production_environment do
     port = Application.get_env(:qlc_digital, :port)
     host = Application.get_env(:qlc_digital, :host)
     redis_config = Application.get_env(:qlc_digital, :redis, [])
