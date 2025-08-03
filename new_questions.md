@@ -330,7 +330,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## final_summary
 
-**Question:** Thank you for your time and trust today. Take care of yourself, mama.
+**Question:** Thank you for your time and trust today. Take care of yourself, mama. Bye.
 **Type:** summary
 **Next:** nil
 
