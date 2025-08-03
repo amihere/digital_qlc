@@ -273,15 +273,8 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## professional_contact
 
-**Question:** That's a brave and powerful choice. Recognizing you need that level of support is a sign of great strength. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. To arrange this, I need to ask for the best phone number for our team to reach you at. This number will only be used for this purpose and will be handled according to our Privacy Policy. What is the best phone number for our team to reach you at? [For example: 0242445566 or +1-2235556789]
-**Type:** text
-**Next:** professional_confirmation
+**Question:** That's a brave and powerful choice. Recognizing you need that level of support is a sign of great strength. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. You're being a good mom to yourself, which is how you're a good mom to your baby. Reply to move to the next message.
 
----
-
-## professional_confirmation
-
-**Question:** Thank you. A team member will be in touch within two business day. You're being a good mom to yourself, which is how you're a good mom to your baby.
 **Type:** text
 **Next:** feedback_request
 
@@ -289,25 +282,9 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## community_group_info
 
-**Question:** That's a wonderful idea. Sometimes, a mother just needs another mother who understands. Our groups are safe, private spaces led by a facilitator where you can share and listen without judgment. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. To arrange this, I need to ask for your phone number so we can add you to our platform. This number will only be used for this purpose and will be handled according to our Privacy Policy. What is the best phone number for our team to reach you at? [For example: 0242445566 or +1-2235556789]
-**Type:** text
-**Next:** group_likelihood
-
----
-
-## group_likelihood
-
-**Question:** How likely do you feel you are to join an upcoming group session?
+**Question:** That's a wonderful idea. Sometimes, a mother just needs another mother who understands. Our groups are safe, private spaces led by a facilitator where you can share and listen without judgment. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. How likely do you feel you are to join an upcoming group session?
 **Type:** choice
 **Options:** Very likely I'm interested!, Somewhat likely I'd like to see the schedule, Unsure tell me more about how it works
-**Next:** group_confirmation
-
----
-
-## group_confirmation
-
-**Question:** That's great. I'm always here if you need me.
-**Type:** text
 **Next:** feedback_request
 
 ---
