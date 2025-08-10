@@ -40,6 +40,19 @@ defmodule QlcDigital.Question.Session do
 
         reroute(session_id, key)
 
+      String.match?(answer, ~r/^eli back$/) ->
+        case ConversationManager.load_conversation(session_id) do
+          {:ok, conversation} ->
+            previous_question = Conversation.get_previous_question(conversation)
+            if previous_question do
+              reroute(session_id, previous_question)
+            else
+              reroute(session_id, "start")
+            end
+          _ ->
+            _start_session(session_id)
+        end
+
       true ->
         _start_session(session_id)
     end

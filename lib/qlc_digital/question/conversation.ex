@@ -11,7 +11,8 @@ defmodule QlcDigital.Question.Conversation do
     :answers,
     :started_at,
     :updated_at,
-    :completed
+    :completed,
+    :question_history
   ]
 
   @type t :: %__MODULE__{
@@ -20,7 +21,8 @@ defmodule QlcDigital.Question.Conversation do
           answers: map(),
           started_at: DateTime.t(),
           updated_at: DateTime.t(),
-          completed: boolean()
+          completed: boolean(),
+          question_history: list(String.t())
         }
 
   def new(session_id, current \\ "start") do
@@ -32,7 +34,8 @@ defmodule QlcDigital.Question.Conversation do
       answers: %{},
       started_at: now,
       updated_at: now,
-      completed: false
+      completed: false,
+      question_history: [current]
     }
   end
 
@@ -47,12 +50,27 @@ defmodule QlcDigital.Question.Conversation do
   def set_current_question(%__MODULE__{} = conversation, question_id) do
     completed = question_id == nil || question_id == "completed"
 
+    updated_history =
+      if question_id && question_id not in conversation.question_history do
+        conversation.question_history ++ [question_id]
+      else
+        conversation.question_history
+      end
+
     %{
       conversation
       | current_question_id: question_id,
         updated_at: DateTime.utc_now(),
-        completed: completed
+        completed: completed,
+        question_history: updated_history
     }
+  end
+
+  def get_previous_question(%__MODULE__{question_history: history} = _conversation) do
+    case Enum.reverse(history) do
+      [_current | [previous | _rest]] -> previous
+      _ -> nil
+    end
   end
 
   def interpolate_text(text, answers) do
