@@ -64,7 +64,7 @@ defmodule QlcDigital.MessageHandler do
     response =
       case Session.get_current_question(conversation) do
         nil ->
-          "Thank you for engaging in this initial release"
+          nil
 
         %{type: :summary} = summary ->
           summary.text |> String.replace("\\n", "\n")
@@ -73,11 +73,16 @@ defmodule QlcDigital.MessageHandler do
           Session.display_question(question, conversation.answers)
       end
 
-    Logger.info(response)
     send_message(:meta, to, response)
   end
 
+  defp send_message(:meta, _to, message) when is_nil(message) do
+    Logger.info("Message was nil")
+  end
+
   defp send_message(:meta, to, message) do
+    Logger.info(message)
+
     client_module = whatsapp_client_module()
     Logger.debug("Using WhatsApp client module: #{inspect(client_module)}")
     client_module.send_message(to, message)
