@@ -191,7 +191,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 **Question:** The thought of harming myself has occurred to me.
 **Type:** choice
 **Options:** Yes quite often, Sometimes, Hardly ever, Never
-**Next:** case epds_q10: Never -> epds_completion, Yes quite often -> safety_protocol, Sometimes -> safety_protocol, Hardly ever -> safety_protocol
+**Next:** case epds_q10: Yes quite often -> safety_protocol, Sometimes -> safety_protocol, Hardly ever -> epds_completion, Never -> epds_completion
 
 ---
 
@@ -206,7 +206,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## safety_confirmation
 
-**Question:** Thank you. Please reach out to them now.
+**Question:** Thank you. Please reach out to them now. Bye
 **Type:** summary
 **Next:** nil
 
