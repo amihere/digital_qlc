@@ -3,7 +3,7 @@ defmodule QlcDigital.SignupHandler do
   Handles creating and updating user signups in Airtable with bio information
   """
 
-  alias QlcDigital.{AirtableClient, Signup}
+  alias QlcDigital.{AirtableClient}
   alias QlcDigital.Question.{Conversation, QuestionConfig}
 
   @signups_table "Signups"
@@ -21,7 +21,8 @@ defmodule QlcDigital.SignupHandler do
         name: name,
         phone_number: phone_number,
         location: location,
-        country: country
+        country: country,
+        notes: "From Whatsapp Bot"
       }
       |> Enum.filter(fn {_key, value} -> value != nil end)
       |> Enum.into(%{})
@@ -40,7 +41,8 @@ defmodule QlcDigital.SignupHandler do
       location: answers["location"],
       country: convert_choice_to_text("country", answers["country"]),
       mental_health_experience:
-        convert_choice_to_text("mental_health_experience", answers["mental_health_experience"])
+        convert_choice_to_text("mental_health_experience", answers["mental_health_experience"]),
+      notes: "From Whatsapp Bot"
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
     |> Enum.into(%{})
