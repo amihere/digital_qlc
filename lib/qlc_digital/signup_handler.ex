@@ -9,7 +9,6 @@ defmodule QlcDigital.SignupHandler do
   @signups_table "Signups"
 
   def upsert_bio_info(%Conversation{} = conversation) do
-    IO.inspect(conversation.answers, label: "all answers")
     bio_data = extract_bio_info(conversation)
     client = AirtableClient.new(@signups_table)
 
@@ -19,9 +18,8 @@ defmodule QlcDigital.SignupHandler do
   defp extract_bio_info(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
-    mental_health_experience = Map.get(answers, :mental_health_experience)
-
-    # mental_health_experience = answers["mental_health_experience"] || Map.get(answers, :mental_health_experience)
+    mental_health_experience =
+      answers["mental_health_experience"] || Map.get(answers, :mental_health_experience)
 
     %{
       name: Map.get(answers, :start),
