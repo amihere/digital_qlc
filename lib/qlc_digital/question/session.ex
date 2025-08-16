@@ -4,6 +4,7 @@ defmodule QlcDigital.Question.Session do
   """
 
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
+  alias QlcDigital.SignupHandler
 
   # override the current user's flow
   defp reroute(session_id, stage) do
@@ -137,6 +138,11 @@ defmodule QlcDigital.Question.Session do
           # Update current question
           final_conversation =
             Conversation.set_current_question(updated_conversation, next_question_id)
+
+          # Upsert bio info to Airtable when reaching parenthood_stage
+          if next_question_id == "parenthood_stage" do
+            Task.start(fn -> SignupHandler.upsert_bio_info(final_conversation) end)
+          end
 
           # Save to Redis
           :ok = ConversationManager.save_conversation(final_conversation)
