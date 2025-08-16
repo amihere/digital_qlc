@@ -154,10 +154,18 @@ defmodule QlcDigital.Question.Session do
             Task.start(fn -> SignupHandler.upsert_bio_info(final_conversation) end)
           end
 
-          # Save to Redis
-          :ok = ConversationManager.save_conversation(final_conversation)
+          # Add EPDS score to conversation when reaching epds_completion
+          final_conversation_with_score = if next_question_id == "epds_completion" do
+            score_data = EpdsScorer.calculate_epds_score(final_conversation)
+            Conversation.add_answer(final_conversation, "epds_score", "#{score_data.total_score}/#{score_data.max_score} - #{score_data.interpretation}")
+          else
+            final_conversation
+          end
 
-          {:ok, final_conversation}
+          # Save to Redis
+          :ok = ConversationManager.save_conversation(final_conversation_with_score)
+
+          {:ok, final_conversation_with_score}
 
         {:error, reason} ->
           {:error, reason}
