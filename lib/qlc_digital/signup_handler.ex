@@ -9,6 +9,7 @@ defmodule QlcDigital.SignupHandler do
   @signups_table "Signups"
 
   def upsert_bio_info(%Conversation{} = conversation) do
+    IO.inspect(conversation.answers, label: "all answers")
     bio_data = extract_bio_info(conversation)
     client = AirtableClient.new(@signups_table)
 
@@ -18,14 +19,18 @@ defmodule QlcDigital.SignupHandler do
   defp extract_bio_info(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
+    mental_health_experience = Map.get(answers, :mental_health_experience)
+
+    # mental_health_experience = answers["mental_health_experience"] || Map.get(answers, :mental_health_experience)
+
     %{
-      name: answers["start"],
+      name: Map.get(answers, :start),
       phone_number: conversation.session_id,
-      age: answers["privacy_intro"],
-      location: answers["location"],
-      country: convert_choice_to_text("country", answers["country"]),
+      age: Map.get(answers, :privacy_intro),
+      location: Map.get(answers, :location),
+      country: convert_choice_to_text("country", Map.get(answers, :country)),
       mental_health_experience:
-        convert_choice_to_text("mental_health_experience", answers["mental_health_experience"]),
+        convert_choice_to_text("mental_health_experience", mental_health_experience),
       notes: "From Whatsapp Bot"
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
