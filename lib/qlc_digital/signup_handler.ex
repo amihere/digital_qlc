@@ -23,7 +23,7 @@ defmodule QlcDigital.SignupHandler do
       phone_number: conversation.session_id,
       age: map_correct_value(answers, :privacy_intro),
       location: map_correct_value(answers, :location),
-      country: convert_choice_to_text("country", map_correct_value(answers, :country)),
+      country: get_country_value(answers),
       mental_health_experience:
         convert_choice_to_text(
           "mental_health_experience",
@@ -37,6 +37,16 @@ defmodule QlcDigital.SignupHandler do
 
   defp map_correct_value(map, key) do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
+
+  defp get_country_value(answers) do
+    country_choice = convert_choice_to_text("country", map_correct_value(answers, :country))
+
+    if country_choice == "Other (please type)" do
+      map_correct_value(answers, :country_other)
+    else
+      country_choice
+    end
   end
 
   defp convert_choice_to_text(_question_id, nil), do: nil

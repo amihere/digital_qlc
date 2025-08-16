@@ -23,7 +23,7 @@ defmodule QlcDigital.ResponseSaver do
       name: map_correct_value(answers, :start),
       age: map_correct_value(answers, :privacy_intro),
       location: map_correct_value(answers, :location),
-      country: convert_choice_to_text("country", map_correct_value(answers, :country)),
+      country: get_country_value(answers),
       mental_health_experience:
         convert_choice_to_text(
           "mental_health_experience",
@@ -54,6 +54,16 @@ defmodule QlcDigital.ResponseSaver do
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
     |> Enum.into(%{})
+  end
+
+  defp get_country_value(answers) do
+    country_choice = convert_choice_to_text("country", map_correct_value(answers, :country))
+
+    if country_choice == "Other (please type)" do
+      map_correct_value(answers, :country_other)
+    else
+      country_choice
+    end
   end
 
   defp convert_choice_to_text(question_id, answer) when is_binary(answer) do

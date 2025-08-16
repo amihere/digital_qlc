@@ -30,7 +30,15 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** What country are you from?
 **Type:** choice
-**Options:** Ghana, Nigeria, South African, Kenya, Jamaica, USA
+**Options:** Ghana, Nigeria, South Africa, Kenya, Jamaica, USA, Other (please type)
+**Next:** case country: Ghana -> mental_health_experience, Nigeria -> mental_health_experience, South Africa -> mental_health_experience, Kenya -> mental_health_experience, Jamaica -> mental_health_experience, USA -> mental_health_experience, Other (please type) -> country_other
+
+---
+
+## country_other
+
+**Question:** Please tell us which country you are from:
+**Type:** text
 **Next:** mental_health_experience
 
 ---
