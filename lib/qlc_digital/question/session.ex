@@ -4,7 +4,7 @@ defmodule QlcDigital.Question.Session do
   """
 
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
-  alias QlcDigital.SignupHandler
+  alias QlcDigital.{SignupHandler, EpdsScorer}
 
   # override the current user's flow
   defp reroute(session_id, stage) do
@@ -86,7 +86,17 @@ defmodule QlcDigital.Question.Session do
     if question do
       # Interpolate any variables in the question text
       interpolated_text = Conversation.interpolate_text(question.text, conversation.answers)
-      %{question | text: interpolated_text}
+
+      # Add EPDS score summary for epds_completion question
+      final_text =
+        if conversation.current_question_id == "epds_completion" do
+          epds_summary = EpdsScorer.format_epds_summary(conversation)
+          "#{interpolated_text}\n\n#{epds_summary}"
+        else
+          interpolated_text
+        end
+
+      %{question | text: final_text}
     else
       nil
     end
