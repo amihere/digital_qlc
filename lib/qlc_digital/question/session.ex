@@ -30,6 +30,9 @@ defmodule QlcDigital.Question.Session do
       String.match?(answer, ~r/^eli restart$/) ->
         reroute(session_id, "start")
 
+      String.match?(answer, ~r/^sos$/) ->
+        reroute(session_id, "crisis_checkin")
+
       String.match?(answer, ~r/^eli return$/) ->
         {:ok, conversation} = ConversationManager.load_conversation(session_id)
 
@@ -44,11 +47,13 @@ defmodule QlcDigital.Question.Session do
         case ConversationManager.load_conversation(session_id) do
           {:ok, conversation} ->
             previous_question = Conversation.get_previous_question(conversation)
+
             if previous_question do
               reroute(session_id, previous_question)
             else
               reroute(session_id, "start")
             end
+
           _ ->
             _start_session(session_id)
         end
