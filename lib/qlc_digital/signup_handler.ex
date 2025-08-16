@@ -18,21 +18,25 @@ defmodule QlcDigital.SignupHandler do
   defp extract_bio_info(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
-    mental_health_experience =
-      answers["mental_health_experience"] || Map.get(answers, :mental_health_experience)
-
     %{
-      name: Map.get(answers, :start),
+      name: map_correct_value(answers, :start),
       phone_number: conversation.session_id,
-      age: Map.get(answers, :privacy_intro),
-      location: Map.get(answers, :location),
-      country: convert_choice_to_text("country", Map.get(answers, :country)),
+      age: map_correct_value(answers, :privacy_intro),
+      location: map_correct_value(answers, :location),
+      country: convert_choice_to_text("country", map_correct_value(answers, :country)),
       mental_health_experience:
-        convert_choice_to_text("mental_health_experience", mental_health_experience),
+        convert_choice_to_text(
+          "mental_health_experience",
+          map_correct_value(answers, :mental_health_experience)
+        ),
       notes: "From Whatsapp Bot"
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
     |> Enum.into(%{})
+  end
+
+  defp map_correct_value(map, key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
   end
 
   defp convert_choice_to_text(_question_id, nil), do: nil
