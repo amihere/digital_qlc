@@ -4,7 +4,7 @@ defmodule QlcDigital.Question.Session do
   """
 
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
-  alias QlcDigital.{SignupHandler, EpdsScorer}
+  alias QlcDigital.{SignupHandler, EpdsScorer, ResponseSaver}
 
   # override the current user's flow
   defp reroute(session_id, stage) do
@@ -160,6 +160,11 @@ defmodule QlcDigital.Question.Session do
             Conversation.add_answer(final_conversation, "epds_score", "#{score_data.total_score}/#{score_data.max_score} - #{score_data.interpretation}")
           else
             final_conversation
+          end
+
+          # Save complete response to Airtable when conversation ends
+          if next_question_id == nil do
+            Task.start(fn -> ResponseSaver.save_complete_response(final_conversation_with_score) end)
           end
 
           # Save to Redis
