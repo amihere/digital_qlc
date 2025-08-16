@@ -42,7 +42,7 @@ defmodule QlcDigital.ResponseSaver do
       epds_q10: convert_choice_to_text("epds_q10", answers["epds_q10"]),
       feedback: answers["feedback_request"],
       checkout_choice: convert_choice_to_text("checkout_point", answers["checkout_point"]),
-      notes: "From Whatsapp Bot - Complete Response"
+      notes: "From the Whatsapp Bot"
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
     |> Enum.into(%{})
@@ -66,4 +66,3 @@ defmodule QlcDigital.ResponseSaver do
 
   defp convert_choice_to_text(_question_id, answer), do: answer
 end
-
