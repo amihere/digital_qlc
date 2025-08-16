@@ -152,7 +152,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## epds_q6
 
-**Question:** Things have been getting on top of me.
+**Question:** Have you felt so overwhelmed that it's been hard to cope?
 **Type:** choice
 **Options:** Yes most of the time I haven't been able to cope at all, Yes sometimes I haven't been coping as well as usual, No most of the time I have coped quite well, No I have been coping as well as ever
 **Next:** epds_q7
@@ -199,7 +199,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 **Question:** Thank you for being so honest with me, {name}. That is the most important thing you could have shared. Because you've indicated you're having thoughts of harming yourself, your safety is the only thing that matters right now. I need to stop our chat and connect you with help. Please call this number immediately: 0800678678. They are available 24/7 to talk and can offer immediate, confidential support. Can you please confirm you have seen this number?
 **Type:** choice
-**Options:** Yes I have the number, Call the number for me
+**Options:** Yes I have seen the number
 **Next:** safety_confirmation
 
 ---
@@ -256,9 +256,10 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## stress_explanation
 
-**Question:** That experience you described—the constant tension and the racing thoughts—is a sign that your mind and body are stuck on high alert. That is an exhausting way to live, and it's a very common experience for nursing mothers. You do not have to live with that tension all the time, and there are ways to find calm again.
-**Type:** text
-**Next:** checkout_point
+**Question:** That experience you described—the constant tension and the racing thoughts—is a sign that your mind and body are stuck on high alert. That is an exhausting way to live, and it's a very common experience for nursing mothers. Since you don't feel like engaging with any exercises now, would you like to explore any of these other options?
+**Type:** choice
+**Options:** Explore talking to a professional, Learn about the community support group, Just rest for now. I need time to think.
+**Next:** case stress_explanation: Explore talking to a professional -> professional_contact, Learn about the community support group -> community_group_info, Just rest for now. I need time to think. -> rest_choice
 
 ---
 
@@ -273,33 +274,33 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## professional_contact
 
-**Question:** That's a brave and powerful choice. Recognizing you need that level of support is a sign of great strength. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. You're being a good mom to yourself, which is how you're a good mom to your baby. Reply to move to the next message.
-
-**Type:** text
-**Next:** feedback_request
+**Question:** That's a brave and powerful choice. Recognizing you need that level of support is a sign of great strength. A member of our care team will reach out to you in 72 hours to discuss scheduling a call with a professional. Would you like to leave some feedback in your own words? My team would love to hear from you.
+**Type:** choice
+**Options:** Yes!, No
+**Next:** case professional_contact: Yes! -> feedback_request, No -> final_summary
 
 ---
 
 ## community_group_info
 
-**Question:** That's a wonderful idea. Sometimes, a mother just needs another mother who understands. Our groups are safe, private spaces led by a facilitator where you can share and listen without judgment. Based on your selection, a member of our care team can reach out to you confidentially to help schedule a call with a professional. How likely do you feel you are to join an upcoming group session?
+**Question:** That's a wonderful idea. Sometimes, a mother just needs another mother who understands. Our groups are safe, private spaces led by a facilitator/mother where you can share and listen without judgment. Based on your selection, a member of our care team will reach out to you connect you with a group within 72 hours. Would you like to leave some feedback in your own words? My team would love to hear from you.
 **Type:** choice
-**Options:** Very likely I'm interested!, Somewhat likely I'd like to see the schedule, Unsure tell me more about how it works
-**Next:** feedback_request
+**Options:** Yes!, No
+**Next:** case community_group_info: Yes! -> feedback_request, No -> final_summary
 
 ---
 
 ## rest_choice
 
-**Question:** That is a perfectly good and wise choice. Listening to your own needs is a beautiful act of self-care. Sometimes the most important thing we can do is pause and not rush. I won't overwhelm you with any more questions or options. You can come back and explore the other options anytime. Sure. I'm always here if you need me.
-**Type:** text
-**Next:** feedback_request
+**Question:** That is a perfectly wise choice. Listening to your own needs is a beautiful act of self-care. I won't overwhelm you with any more questions or options. You can come back and explore the other options anytime; I'm always here if you need me. Would you like to leave some feedback in your own words?
+**Options:** Yes!, No
+**Next:** case rest_choice: Yes! -> feedback_request, No -> final_summary
 
 ---
 
 ## feedback_request
 
-**Question:** My team would appreciate your feedback So can you tell us what you think about Eli? [Please don't leave any sensitive information here as responses can take up to 1 week]
+**Question:** My team would appreciate your feedback. Can you tell us what you think about Eli?
 **Type:** text
 **Next:** final_summary
 
