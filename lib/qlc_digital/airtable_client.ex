@@ -109,6 +109,8 @@ defmodule QlcDigital.AirtableClient do
       }
       |> Jason.encode!()
 
+    IO.inspect(body, label: "ooog")
+
     case HTTPoison.patch(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         record = Jason.decode!(response_body)
