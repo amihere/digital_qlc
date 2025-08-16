@@ -15,22 +15,6 @@ defmodule QlcDigital.SignupHandler do
     AirtableClient.upsert_record(client, conversation.session_id, bio_data)
   end
 
-  def upsert_bio_info(phone_number, name, location, country) do
-    bio_data =
-      %{
-        name: name,
-        phone_number: phone_number,
-        location: location,
-        country: country,
-        notes: "From Whatsapp Bot"
-      }
-      |> Enum.filter(fn {_key, value} -> value != nil end)
-      |> Enum.into(%{})
-
-    client = AirtableClient.new(@signups_table)
-    AirtableClient.upsert_record(client, phone_number, bio_data)
-  end
-
   defp extract_bio_info(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
@@ -67,4 +51,3 @@ defmodule QlcDigital.SignupHandler do
     end
   end
 end
-
