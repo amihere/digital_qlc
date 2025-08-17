@@ -19,9 +19,9 @@ defmodule QlcDigital.ResponseSaver do
     answers = conversation.answers || %{}
 
     age =
-      case map_correct_value(answers, :privacy_intro) do
+      case map_correct_value(answers, :privacy_intro) |> Integer.parse() do
         {age, _} -> age
-        {:error} -> nil
+        :error -> nil
       end
 
     %{
