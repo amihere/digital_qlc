@@ -12,6 +12,7 @@ defmodule QlcDigital.ResponseSaver do
     response_data = build_response_data(conversation)
     client = AirtableClient.new(@responses_table)
 
+    IO.inspect(response_data, label: "saving")
     AirtableClient.upsert_record(client, conversation.session_id, response_data)
   end
 
