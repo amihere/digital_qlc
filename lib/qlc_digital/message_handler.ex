@@ -84,7 +84,6 @@ defmodule QlcDigital.MessageHandler do
     Logger.info(message)
 
     client_module = whatsapp_client_module()
-    Logger.debug("Using WhatsApp client module: #{inspect(client_module)}")
     client_module.send_message(to, message)
   end
 end

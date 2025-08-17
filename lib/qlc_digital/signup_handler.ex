@@ -26,10 +26,16 @@ defmodule QlcDigital.SignupHandler do
   defp extract_bio_info(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
+    age =
+      case map_correct_value(answers, :privacy_intro) do
+        {age, _} -> age
+        {:error} -> nil
+      end
+
     %{
       name: map_correct_value(answers, :start),
       phone_number: conversation.session_id,
-      age: map_correct_value(answers, :privacy_intro),
+      age: age,
       location: map_correct_value(answers, :location),
       country: get_country_value(answers),
       mental_health_experience:

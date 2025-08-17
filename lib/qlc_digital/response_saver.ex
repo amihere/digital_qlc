@@ -18,10 +18,16 @@ defmodule QlcDigital.ResponseSaver do
   defp build_response_data(%Conversation{} = conversation) do
     answers = conversation.answers || %{}
 
+    age =
+      case map_correct_value(answers, :privacy_intro) do
+        {age, _} -> age
+        {:error} -> nil
+      end
+
     %{
       phone_number: conversation.session_id,
       name: map_correct_value(answers, :start),
-      age: map_correct_value(answers, :privacy_intro),
+      age: age,
       location: map_correct_value(answers, :location),
       country: get_country_value(answers),
       mental_health_experience:
