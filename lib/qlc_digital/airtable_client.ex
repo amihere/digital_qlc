@@ -27,6 +27,8 @@ defmodule QlcDigital.AirtableClient do
       }
       |> Jason.encode!()
 
+    IO.inspect(body, label: "creating")
+
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         {:ok, Jason.decode!(response_body)}
@@ -106,6 +108,8 @@ defmodule QlcDigital.AirtableClient do
         "fields" => normalize_fields(fields)
       }
       |> Jason.encode!()
+
+    IO.inspect(body, label: "upserting")
 
     case HTTPoison.patch(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->

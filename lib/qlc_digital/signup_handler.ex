@@ -9,8 +9,10 @@ defmodule QlcDigital.SignupHandler do
   @signups_table "Signups"
 
   def upsert_bio_info(%Conversation{} = conversation) do
+    IO.inspect(conversation.answers)
     bio_data = extract_bio_info(conversation)
     client = AirtableClient.new(@signups_table)
+    IO.inspect(bio_data)
 
     AirtableClient.upsert_record(client, conversation.session_id, bio_data)
   end
@@ -29,7 +31,7 @@ defmodule QlcDigital.SignupHandler do
           "mental_health_experience",
           map_correct_value(answers, :mental_health_experience)
         ),
-      notes: "From Whatsapp Bot"
+      notes: "From the Whatsapp Bot"
     }
     |> Enum.filter(fn {_key, value} -> value != nil end)
     |> Enum.into(%{})
