@@ -88,24 +88,18 @@ defmodule QlcDigital.EpdsScorer do
     total_score =
       epds_questions
       |> Enum.map(fn question_id ->
-        score_question(question_id, answers[question_id])
+        score_question(question_id, map_correct_value(answers, question_id))
       end)
       |> Enum.sum()
 
     # Special condition: if epds_q10 is answered with option 1 or 2 (index-based), upgrade to highest score
-    final_score = check_q10_special_condition(answers["epds_q10"], total_score)
+    final_score = check_q10_special_condition(map_correct_value(answers, "epds_q10"), total_score)
 
     %{
       total_score: final_score,
       max_score: 30,
       interpretation: interpret_score(final_score)
     }
-  end
-
-  def format_epds_summary(%Conversation{} = conversation) do
-    score_data = calculate_epds_score(conversation)
-
-    "Your EPDS assessment score: #{score_data.total_score}/#{score_data.max_score}. #{score_data.interpretation}"
   end
 
   defp score_question(question_id, answer) when is_binary(answer) do
@@ -142,7 +136,7 @@ defmodule QlcDigital.EpdsScorer do
 
       # Option 2 selected (Sometimes) - upgrade to highest score
       {2, ""} ->
-        30
+        25
 
       _ ->
         # Check if text answer matches options 1 or 2
@@ -158,13 +152,18 @@ defmodule QlcDigital.EpdsScorer do
 
   defp check_q10_special_condition(_q10_answer, current_score), do: current_score
 
-  defp interpret_score(score) when score >= 13,
-    do: "Likely depression - recommend professional support"
+  defp interpret_score(score) when score > 19,
+    do: [note: "Likely depression - recommend professional support", route: "epds_completion"]
 
   defp interpret_score(score) when score >= 10,
-    do: "Possible depression - consider professional consultation"
+    do: [
+      note: "Possible depression - consider professional consultation",
+      route: "epds_completion_mid"
+    ]
 
-  defp interpret_score(score) when score >= 6, do: "Mild symptoms - monitor and self-care"
-  defp interpret_score(_score), do: "Minimal symptoms"
+  defp interpret_score(_score), do: [note: "Minimal symptoms", route: "epds_completion_high"]
+
+  defp map_correct_value(map, key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
 end
-

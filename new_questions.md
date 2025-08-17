@@ -220,11 +220,30 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ---
 
+## epds_completion_high
+
+**Question:** Thank you for sharing all of that with me, {name}. You have done a hard thing today by putting words to your experience. Based on everything you've told me, it might be best to speak to a professional. Would you like our team to reach out to you in the next 72 hours to discuss scheduling a call with a professional?
+**Type:** choice
+**Options:** Yes, No
+**Next:** case professional_contact: Yes -> feedback_request, No -> final_summary
+
+---
+
+## epds_completion_mid
+
+**Question:** Thank you for sharing all of that with me, {name}. You have done a hard thing today by putting words to your experience. Based on everything you've told me, connecting with more support could be a really kind next step for yourself. What feels like the best option for you right now?
+**Type:** choice
+**Options:** Explore talking to a professional, Learn about the community support group, Just rest for now. I need time to think.
+**Next:** case epds_completion_mid: Explore talking to a professional -> professional_contact, Learn about the community support group -> community_group_info, Just rest for now. I need time to think. -> rest_choice
+
+---
+
 ## epds_completion
 
-**Question:** Thank you for sharing all of that with me. I know those questions can be tough. Taking the time to reflect like this is a real act of self-care. It shows you're paying attention to how you feel, and that's the first step toward getting the support you deserve.
-**Type:** text
-**Next:** checkout_point
+**Question:** Thank you for sharing all of that with me, {name}. You have done a hard thing today by putting words to your experience. Based on everything you've told me, here are some options for you. What feels like the best for you right now?
+**Type:** choice
+**Options:** Learn about the community support group, Just rest for now. I need time to think.
+**Next:** case epds_completion: Learn about the community support group -> community_group_info, Just rest for now. I need time to think. -> rest_choice
 
 ---
 

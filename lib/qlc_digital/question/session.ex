@@ -3,6 +3,8 @@ defmodule QlcDigital.Question.Session do
   Handles a single question-answer session.
   """
 
+  require Logger
+
   alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
   alias QlcDigital.{SignupHandler, EpdsScorer, ResponseSaver}
 
@@ -81,22 +83,25 @@ defmodule QlcDigital.Question.Session do
   end
 
   def get_current_question(%Conversation{} = conversation) do
-    question = QuestionConfig.get_question(conversation.current_question_id)
+    # Add EPDS score summary for epds_completion question
+    question =
+      if conversation.current_question_id == "epds_completion" do
+        score_data = EpdsScorer.calculate_epds_score(conversation)
+
+        Logger.debug(
+          "Your EPDS assessment score: #{score_data.total_score}/#{score_data.max_score}. #{score_data.interpretation}"
+        )
+
+        qid = score_data.interpretation[:route]
+        QuestionConfig.get_question(qid)
+      else
+        QuestionConfig.get_question(conversation.current_question_id)
+      end
 
     if question do
       # Interpolate any variables in the question text
       interpolated_text = Conversation.interpolate_text(question.text, conversation.answers)
-
-      # Add EPDS score summary for epds_completion question
-      final_text =
-        if conversation.current_question_id == "epds_completion" do
-          epds_summary = EpdsScorer.format_epds_summary(conversation)
-          "#{interpolated_text}\n\n#{epds_summary}"
-        else
-          interpolated_text
-        end
-
-      %{question | text: final_text}
+      %{question | text: interpolated_text}
     else
       nil
     end
@@ -155,16 +160,24 @@ defmodule QlcDigital.Question.Session do
           end
 
           # Add EPDS score to conversation when reaching epds_completion
-          final_conversation_with_score = if next_question_id == "epds_completion" do
-            score_data = EpdsScorer.calculate_epds_score(final_conversation)
-            Conversation.add_answer(final_conversation, "epds_score", "#{score_data.total_score}/#{score_data.max_score} - #{score_data.interpretation}")
-          else
-            final_conversation
-          end
+          final_conversation_with_score =
+            if next_question_id == "epds_completion" do
+              score_data = EpdsScorer.calculate_epds_score(final_conversation)
+
+              Conversation.add_answer(
+                final_conversation,
+                "epds_score",
+                "#{score_data.total_score}/#{score_data.max_score} - #{score_data.interpretation}"
+              )
+            else
+              final_conversation
+            end
 
           # Save complete response to Airtable when conversation ends
           if next_question_id == nil do
-            Task.start(fn -> ResponseSaver.save_complete_response(final_conversation_with_score) end)
+            Task.start(fn ->
+              ResponseSaver.save_complete_response(final_conversation_with_score)
+            end)
           end
 
           # Save to Redis
