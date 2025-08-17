@@ -67,7 +67,8 @@ defmodule QlcDigital.ResponseSaver do
         notes: "From the Whatsapp Bot"
       }
       |> Enum.filter(fn {_key, value} -> value != nil end)
-      |> Enum.into(%{})
+      |> Enum.map(fn {k, v} -> "#{k}-> #{v}\n" end)
+      |> Enum.join(", ")
 
     %{
       phone_number: conversation.session_id,
