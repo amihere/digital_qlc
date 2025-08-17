@@ -13,10 +13,9 @@ defmodule QlcDigital.ResponseSaver do
     response_data = build_response_data(conversation)
     client = AirtableClient.new(@responses_table)
 
-    Logger.warning("saving details 2")
+    Logger.debug("saving response")
     res = AirtableClient.upsert_record(client, conversation.session_id, response_data)
-    IO.inspect(response_data, label: "saving")
-    IO.inspect(res, label: "amazing")
+    Logger.debug(res)
   end
 
   defp build_response_data(%Conversation{} = conversation) do
@@ -67,8 +66,8 @@ defmodule QlcDigital.ResponseSaver do
         notes: "From the Whatsapp Bot"
       }
       |> Enum.filter(fn {_key, value} -> value != nil end)
-      |> Enum.map(fn {k, v} -> "#{k}-> #{v}\n" end)
-      |> Enum.join(", ")
+      |> Enum.map(fn {k, v} -> "#{k}-> #{v}" end)
+      |> Enum.join("\n")
 
     %{
       phone_number: conversation.session_id,
