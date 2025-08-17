@@ -225,7 +225,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 **Question:** Thank you for sharing all of that with me, {name}. You have done a hard thing today by putting words to your experience. Based on everything you've told me, it might be best to speak to a professional. Would you like our team to reach out to you in the next 72 hours to discuss scheduling a call with a professional?
 **Type:** choice
 **Options:** Yes, No
-**Next:** case professional_contact: Yes -> feedback_request, No -> final_summary
+**Next:** case epds_completion_high: Yes -> feedback_request, No -> final_summary
 
 ---
 
