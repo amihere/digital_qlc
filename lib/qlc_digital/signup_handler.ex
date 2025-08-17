@@ -3,18 +3,24 @@ defmodule QlcDigital.SignupHandler do
   Handles creating and updating user signups in Airtable with bio information
   """
 
+  require Logger
   alias QlcDigital.{AirtableClient}
   alias QlcDigital.Question.{Conversation, QuestionConfig}
 
   @signups_table "Signups"
 
   def upsert_bio_info(%Conversation{} = conversation) do
-    IO.inspect(conversation.answers)
     bio_data = extract_bio_info(conversation)
     client = AirtableClient.new(@signups_table)
-    IO.inspect(bio_data)
 
-    AirtableClient.upsert_record(client, conversation.session_id, bio_data)
+    case AirtableClient.upsert_record(client, conversation.session_id, bio_data) do
+      {:ok, _} ->
+        Logger.info("airtable save was a success")
+
+      {:error, rest} ->
+        Logger.error("airtable failed")
+        Logger.error(rest)
+    end
   end
 
   defp extract_bio_info(%Conversation{} = conversation) do
