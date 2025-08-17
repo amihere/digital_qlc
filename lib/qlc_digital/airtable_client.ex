@@ -43,12 +43,12 @@ defmodule QlcDigital.AirtableClient do
 
   def upsert_record(%__MODULE__{} = client, phone_number, fields) do
     case find_by_phone_number(client, phone_number) do
-      {:ok, nil} ->
-        create_record(client, fields)
-
-      {:ok, record} ->
+      {:ok, record} when not is_nil(record) ->
         record_id = record["id"]
         update_record(client, record_id, fields)
+
+      _ ->
+        create_record(client, fields)
     end
   end
 

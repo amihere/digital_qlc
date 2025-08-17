@@ -320,6 +320,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 ## rest_choice
 
 **Question:** That is a perfectly wise choice. Listening to your own needs is a beautiful act of self-care. I won't overwhelm you with any more questions or options. You can come back and explore the other options anytime; I'm always here if you need me. Would you like to leave some feedback in your own words?
+**Type:** choice
 **Options:** Yes!, No
 **Next:** case rest_choice: Yes! -> feedback_request, No -> final_summary
 

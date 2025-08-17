@@ -153,7 +153,10 @@ defmodule QlcDigital.EpdsScorer do
   defp check_q10_special_condition(_q10_answer, current_score), do: current_score
 
   defp interpret_score(score) when score > 19,
-    do: [note: "Likely depression - recommend professional support", route: "epds_completion"]
+    do: [
+      note: "Likely depression - recommend professional support",
+      route: "epds_completion_high"
+    ]
 
   defp interpret_score(score) when score >= 10,
     do: [
@@ -161,7 +164,7 @@ defmodule QlcDigital.EpdsScorer do
       route: "epds_completion_mid"
     ]
 
-  defp interpret_score(_score), do: [note: "Minimal symptoms", route: "epds_completion_high"]
+  defp interpret_score(_score), do: [note: "Minimal symptoms", route: "epds_completion"]
 
   defp map_correct_value(map, key) do
     Map.get(map, key) || Map.get(map, String.to_atom(key))
