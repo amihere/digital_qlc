@@ -6,6 +6,7 @@ defmodule QlcDigital.Question.ConversationManager do
   use GenServer
   alias QlcDigital.Question.Conversation
 
+  @ttl_redis 60 * 60 * 48
   @namespace Application.compile_env(:qlc_digital, :redis, [])[:namespace]
 
   def start_link(_opts) do
@@ -40,6 +41,7 @@ defmodule QlcDigital.Question.ConversationManager do
 
     case Redix.command(:redix, ["SET", key, data]) do
       {:ok, "OK"} ->
+        Redix.command(:redix, ["EXPIRE", key, @ttl_redis])
         # Also add to sessions set for listing
         Redix.command(:redix, [
           "SADD",
