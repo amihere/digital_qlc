@@ -164,6 +164,6 @@ defmodule QlcDigital.EpdsScorer do
   defp interpret_score(_score), do: [note: "Minimal symptoms", route: "epds_completion_high"]
 
   defp map_correct_value(map, key) do
-    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+    Map.get(map, key) || Map.get(map, String.to_atom(key))
   end
 end
