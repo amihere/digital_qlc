@@ -174,7 +174,7 @@ defmodule QlcDigital.Question.Session do
             end
 
           # Save complete response to Airtable when conversation ends
-          if next_question_id == nil do
+          if next_question_id == "final_summary" do
             Task.start(fn ->
               Logger.warning("saving details")
               ResponseSaver.save_complete_response(final_conversation_with_score)

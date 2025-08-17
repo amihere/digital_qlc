@@ -48,7 +48,7 @@ defmodule QlcDigital.Question.Conversation do
   end
 
   def set_current_question(%__MODULE__{} = conversation, question_id) do
-    completed = question_id == nil || question_id == "completed"
+    completed = question_id == nil || question_id == "completed" || question_id == "final_summary"
 
     updated_history =
       if question_id && question_id not in conversation.question_history do

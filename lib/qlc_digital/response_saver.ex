@@ -3,6 +3,7 @@ defmodule QlcDigital.ResponseSaver do
   Saves complete conversation responses to Airtable with meaningful answers
   """
 
+  require Logger
   alias QlcDigital.{AirtableClient}
   alias QlcDigital.Question.{Conversation, QuestionConfig}
 
@@ -12,8 +13,10 @@ defmodule QlcDigital.ResponseSaver do
     response_data = build_response_data(conversation)
     client = AirtableClient.new(@responses_table)
 
+    Logger.warning("saving details 2")
+    res = AirtableClient.upsert_record(client, conversation.session_id, response_data)
     IO.inspect(response_data, label: "saving")
-    AirtableClient.upsert_record(client, conversation.session_id, response_data)
+    IO.inspect(res, label: "amazing")
   end
 
   defp build_response_data(%Conversation{} = conversation) do
