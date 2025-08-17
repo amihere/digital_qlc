@@ -89,7 +89,7 @@ defmodule QlcDigital.Question.Session do
         score_data = EpdsScorer.calculate_epds_score(conversation)
 
         Logger.debug(
-          "Your EPDS assessment score: #{score_data.total_score}/#{score_data.max_score}. #{score_data.interpretation}"
+          "Your EPDS assessment score: #{score_data.total_score}/#{score_data.max_score}. #{score_data.interpretation[:note]}"
         )
 
         qid = score_data.interpretation[:route]
@@ -167,7 +167,7 @@ defmodule QlcDigital.Question.Session do
               Conversation.add_answer(
                 final_conversation,
                 "epds_score",
-                "#{score_data.total_score}/#{score_data.max_score} - #{score_data.interpretation}"
+                "#{score_data.total_score}/#{score_data.max_score}"
               )
             else
               final_conversation
