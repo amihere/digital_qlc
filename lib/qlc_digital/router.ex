@@ -1,7 +1,7 @@
 defmodule QlcDigital.Router do
   use Plug.Router
   require Logger
-  
+
   defp whatsapp_client_module do
     Application.get_env(:qlc_digital, :whatsapp_client_module, QlcDigital.WhatsappClient)
   end
@@ -10,11 +10,12 @@ defmodule QlcDigital.Router do
   plug(:match)
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:dispatch)
+  plug(Plug.Static, at: "/public", from: {:qlc_digital, "priv/static/public/"})
 
   # Webhook verification endpoint
   get "/webhook" do
     verify_token = whatsapp_client_module().get_verify_token()
-    
+
     case conn.params do
       %{
         "hub.mode" => "subscribe",
