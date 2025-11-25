@@ -71,7 +71,7 @@ defmodule QlcDigital.ResponseSaver do
 
     %{
       phone_number: conversation.session_id,
-      notes: notes
+      notes: inspect(notes)
     }
   end
 
