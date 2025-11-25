@@ -54,7 +54,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## parenthood_stage
 
-**Question:** Thanks so much for your patience {name}. Now let's talk about why you're here. What stage of parenthood are you?
+**Question:** Thanks so much for your patience, {name}. Now let's talk about why you're here. What stage of parenthood are you?
 **Type:** choice
 **Options:** I'm a nursing mother
 **Next:** case parenthood_stage: I'm a nursing mother -> nursing_mother_concerns
