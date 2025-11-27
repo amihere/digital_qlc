@@ -7,10 +7,10 @@ defmodule QlcDigital.Router do
   end
 
   plug(Plug.Logger)
+  plug(Plug.Static, at: "/public", from: "priv/static/public")
   plug(:match)
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:dispatch)
-  plug(Plug.Static, at: "/", from: :qlc_digital, only: ~w(public))
 
   # Webhook verification endpoint
   get "/webhook" do
