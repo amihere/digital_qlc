@@ -155,8 +155,9 @@ defmodule QlcDigital.Question.QuestionConfig do
           options =
             String.split(options_str, ",")
             |> Enum.map(&String.trim/1)
-            # used to include commas for yes, no preceding
-            |> String.replace(~r/\b(Yes|No)\b/, "\\1,")
+
+          # used to include commas for yes, no preceding
+          # |> String.replace(~r/\b(Yes|No)\b/, "\\1,")
 
           Map.put(acc, :options, options)
 
