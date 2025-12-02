@@ -12,7 +12,7 @@ This file defines the questions and flow for Eli, a mental health support chatbo
 
 ## privacy_intro
 
-**Question:** Nice to meet you, {name}. I'm here to listen and support you. Before we start, I need to ask for a couple of details to personalize your experience. Your privacy is my highest priority. I will only ask for information when it's needed to help you, and you can always choose to skip a question. Everything you share is kept private and secure. You can read our full Privacy Policy here at any time. How old are you? [For example: 32]
+**Question:** Nice to meet you, {name}. I'm here to listen and support you. Before we start, I need to ask for a couple of details to personalize your experience. Your privacy is my highest priority. I will only ask for information when it's needed to help you, and you can always choose to skip a question. Everything you share is kept private and secure. You can read our full Privacy Policy here (https://qlc-sister-circle.onrender.com/public/privacypol) at any time. How old are you? [For example: 32]
 **Type:** text
 **Next:** location
 
