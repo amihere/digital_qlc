@@ -36,14 +36,19 @@ jobs:
           export MIX_ENV=prod
           mix compile
           mix release
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
           
       - name: Deploy SSH
         run: |
           # cd _build/prod/rel
-          touch qlc_app
-          echo "${{ secrets.SSH_KEY }}" > id_mongo
-          chmod 0644 id_mongo
-          scp -i id_mongo qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+          echo "Hello" > qlc_app
+          scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
         
 
       
