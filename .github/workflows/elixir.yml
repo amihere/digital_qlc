@@ -7,47 +7,50 @@ name: Elixir CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
   build:
     name: Build and test
-    runs-on: ubuntu24
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: '1.18.4'
-        otp-version: '28.0'
-    - name: Install dependencies
-      run: mix deps.get
-    - name: Run tests
-      run: mix test
-    - name: Build
-      run: |
-        export MIX_ENV=prod
-        mix compile
-        mix release
-        EOF
-    - name: Setup SSH key
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_KEY }}
-    - name: Add server to known hosts
-      run: |
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-    - name: Deploy SSH
-      run: |
-        # cd _build/prod/rel
-        touch qlc_app
-        scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+    runs-on: ubuntu-latest
+    steps:  
+      - name: Set up Elixir
+        uses: actions/checkout@v4
+        
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18.4'
+          otp-version: '28.0'
+          
+      - name: Install dependencies
+        run: mix deps.get
+        
+      - name: Run tests
+        run: mix test
+        
+      - name: Build
+        run: |
+          export MIX_ENV=prod
+          mix compile
+          mix release
+          
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+          
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Deploy SSH
+        run: |
+          # cd _build/prod/rel
+          touch qlc_app
+          scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
         
 
       
