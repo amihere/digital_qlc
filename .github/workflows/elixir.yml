@@ -39,7 +39,7 @@ jobs:
       uses: appleboy/scp-action@master
       run: |
         cd _build/prod/rel
-        scp qlc_app ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+        scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
         EOF
         
 
