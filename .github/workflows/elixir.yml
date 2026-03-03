@@ -44,11 +44,15 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           
-      - name: Deploy SSH
-        run: |
-          # cd _build/prod/rel
-          echo "Hello" > qlc_app
-          scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+      - name: Copy artifact
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: _build/prod/rel/qlc_digital/bin/qlc_digital
+          target: /tmp
         
 
       
