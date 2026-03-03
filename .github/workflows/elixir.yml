@@ -37,20 +37,11 @@ jobs:
           mix compile
           mix release
           
-      - name: Setup SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-          
-      - name: Add server to known hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          
       - name: Deploy SSH
         run: |
           # cd _build/prod/rel
           touch qlc_app
-          scp qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+          scp -i ${{ secrets.SSH_KEY }} qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
         
 
       
