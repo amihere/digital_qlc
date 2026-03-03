@@ -36,13 +36,6 @@ jobs:
           export MIX_ENV=prod
           mix compile
           mix release
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           
       - name: Copy artifact
         uses: appleboy/scp-action@v1
