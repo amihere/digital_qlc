@@ -36,16 +36,21 @@ jobs:
           export MIX_ENV=prod
           mix compile
           mix release
-          
-      - name: Copy artifact
-        uses: appleboy/scp-action@v1
+
+      - name: Connect to tailscale
+        uses: tailscale/github-action@v2
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          source: _build/prod/rel/qlc_digital/bin/qlc_digital
-          target: /tmp
+          host: ${{ secrets.TAILSCALE_KEY }}
+        
+      - name: Verify tailscale
+        run: tailscale status
+
+      - name: Copy File via SSH
+        run: |
+          scp -o StrictHostKeyChecking=no \
+          _build/prod/rel/qlc_digital/bin/qlc_digital \
+          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp
+      
         
 
       
