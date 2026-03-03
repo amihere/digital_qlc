@@ -43,7 +43,7 @@ jobs:
           host: ${{ secrets.TAILSCALE_KEY }}
         
       - name: Verify tailscale
-        run: tailscale status
+        run: tailscale status && echo "UP"
 
       - name: Copy File via SSH
         run: |
