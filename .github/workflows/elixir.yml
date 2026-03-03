@@ -41,7 +41,9 @@ jobs:
         run: |
           # cd _build/prod/rel
           touch qlc_app
-          scp -i ${{ secrets.SSH_KEY }} qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+          echo "${{ secrets.SSH_KEY }}" > id_mongo
+          chmod 0644 id_mongo
+          scp -i id_mongo qlc_app ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
         
 
       
