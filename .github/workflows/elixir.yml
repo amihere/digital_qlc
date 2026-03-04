@@ -46,10 +46,14 @@ jobs:
         run: tailscale status && echo "UP"
 
       - name: Copy File via SSH
-        run: |
-          scp -o StrictHostKeyChecking=no \
-          _build/prod/rel/qlc_digital/bin/qlc_digital \
-          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: _build/prod/rel/qlc_digital/bin/qlc_digital
+          target: /tmp
       
         
 
