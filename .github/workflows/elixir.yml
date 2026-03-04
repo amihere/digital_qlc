@@ -40,7 +40,7 @@ jobs:
       - name: Connect to tailscale
         uses: tailscale/github-action@v2
         with:
-          host: ${{ secrets.TAILSCALE_KEY }}
+          authkey: ${{ secrets.TAILSCALE_KEY }}
         
       - name: Verify tailscale
         run: tailscale status && echo "UP"
