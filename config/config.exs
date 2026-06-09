@@ -26,6 +26,9 @@ config :qlc_digital, :whatsapp,
   verify: System.get_env("VERIFY_TOKEN"),
   webhook_url: System.get_env("WEBHOOK_URL")
 
+config :qlc_digital, :encryption,
+  key: System.get_env("ENCRYPTION_KEY")
+
 # Import environment specific config if it exists
 if File.exists?("#{__DIR__}/#{config_env()}.exs") do
   import_config "#{config_env()}.exs"

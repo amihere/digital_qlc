@@ -37,7 +37,7 @@ defmodule QlcDigital.Question.ConversationManager do
   # Server callbacks
   def handle_call({:save, conversation}, _from, state) do
     key = "#{@namespace}::conversation:#{conversation.session_id}"
-    data = Jason.encode!(conversation)
+    data = conversation |> Jason.encode!() |> QlcDigital.Crypto.encrypt()
 
     case Redix.command(:redix, ["SET", key, data]) do
       {:ok, "OK"} ->
@@ -64,13 +64,11 @@ defmodule QlcDigital.Question.ConversationManager do
         {:reply, {:error, :not_found}, state}
 
       {:ok, data} ->
-        case Jason.decode(data, keys: :atoms) do
-          {:ok, conversation_data} ->
-            conversation = struct(Conversation, conversation_data)
-            {:reply, {:ok, conversation}, state}
-
-          {:error, reason} ->
-            {:reply, {:error, reason}, state}
+        with {:ok, json} <- QlcDigital.Crypto.decrypt(data),
+             {:ok, conversation_data} <- Jason.decode(json, keys: :atoms) do
+          {:reply, {:ok, struct(Conversation, conversation_data)}, state}
+        else
+          {:error, reason} -> {:reply, {:error, reason}, state}
         end
 
       {:error, reason} ->
