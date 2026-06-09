@@ -22,6 +22,10 @@ config :qlc_digital, :whatsapp,
   verify: "test_verify_token",
   webhook_url: "http://localhost:4001/webhook"
 
+config :qlc_digital, :encryption,
+  # 32 zero bytes, base64. Tests only.
+  key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
 # Configure logger for test environment
 config :logger, level: :warning
 
