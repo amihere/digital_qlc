@@ -27,6 +27,7 @@ defmodule QlcDigital.Application do
     host = Application.get_env(:qlc_digital, :host)
     redis_config = Application.get_env(:qlc_digital, :redis, [])
     redis_url = redis_config[:url]
+    redis_ca_cert_file = redis_config[:ca_cert_file]
     whatsapp_config = Application.get_env(:qlc_digital, :whatsapp, [])
 
     base_children = [
@@ -37,19 +38,49 @@ defmodule QlcDigital.Application do
        scheme: :http, plug: QlcDigital.Router, options: [port: port, ip: parse_ip(host)]}
     ]
 
-    children = 
-      if redis_url do
-        # TODO: remove ssl laxness
-        redis_child = {Redix, {redis_url, [ssl: true, socket_opts: [verify: :verify_none], name: :redix]}}
-        List.insert_at(base_children, -2, redis_child)
-      else
-        Logger.warning("Redis URL not configured, skipping Redis connection")
-        base_children
+    children =
+      cond do
+        is_nil(redis_url) ->
+          Logger.warning("REDIS_URL not configured, skipping Redis connection")
+          base_children
+
+        String.starts_with?(redis_url, "rediss://") and is_nil(redis_ca_cert_file) ->
+          raise """
+          REDIS_URL uses rediss:// but REDIS_CA_CERT_FILE is unset. Refusing to \
+          start: this would either fall back to plaintext or skip certificate \
+          verification, both of which defeat the point of TLS over the public \
+          internet. Set REDIS_CA_CERT_FILE to the CA bundle that signed the \
+          server certificate.
+          """
+
+        true ->
+          redis_child = {Redix, {redis_url, redix_opts(redis_url, redis_ca_cert_file)}}
+          List.insert_at(base_children, -2, redis_child)
       end
 
     opts = [strategy: :one_for_one, name: QlcDigital.Supervisor]
     Logger.info("Starting the Eli Bot on port #{port} and host #{host}")
     Supervisor.start_link(children, opts)
+  end
+
+  defp redix_opts("rediss://" <> _ = url, ca_cert_file) do
+    %URI{host: host} = URI.parse(url)
+
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: ca_cert_file,
+      depth: 3,
+      server_name_indication: String.to_charlist(host),
+      customize_hostname_check: [
+        match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+      ]
+    ]
+
+    [name: :redix, socket_opts: ssl_opts]
+  end
+
+  defp redix_opts(_plaintext_url, _ca_cert_file) do
+    [name: :redix]
   end
 
   defp parse_ip(host) do
