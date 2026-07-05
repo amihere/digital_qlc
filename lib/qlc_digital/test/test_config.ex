@@ -11,7 +11,9 @@ defmodule QlcDigital.Test.TestConfig do
       {QlcDigital.Test.MockWhatsappClient, [config: get_test_whatsapp_config()]},
       {QlcDigital.Test.MockRedis, {"redis://localhost:6379", [name: :redix]}},
       {Plug.Cowboy,
-       scheme: :http, plug: QlcDigital.Router, options: [port: get_test_port(), ip: {127, 0, 0, 1}]}
+       scheme: :http,
+       plug: QlcDigital.Router,
+       options: [port: get_test_port(), ip: {127, 0, 0, 1}]}
     ]
   end
 

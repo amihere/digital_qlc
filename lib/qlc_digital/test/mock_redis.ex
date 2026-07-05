@@ -96,11 +96,12 @@ defmodule QlcDigital.Test.MockRedis do
 
   # Handle cast for Redix pipelining compatibility
   def handle_cast({:pipeline, commands, caller, _timeout}, state) do
-    {results, new_state} = Enum.reduce(commands, {[], state}, fn cmd, {acc_results, acc_state} ->
-      {result, updated_state} = execute_command(cmd, acc_state)
-      {[result | acc_results], updated_state}
-    end)
-    
+    {results, new_state} =
+      Enum.reduce(commands, {[], state}, fn cmd, {acc_results, acc_state} ->
+        {result, updated_state} = execute_command(cmd, acc_state)
+        {[result | acc_results], updated_state}
+      end)
+
     final_results = Enum.reverse(results)
     send(elem(caller, 0), {elem(caller, 1), {:ok, final_results}})
     {:noreply, new_state}

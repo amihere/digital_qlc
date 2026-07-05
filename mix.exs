@@ -7,6 +7,8 @@ defmodule QlcDigital.MixProject do
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
+      # test_helpers.ex is loaded by test_helper.exs, not a test file itself
+      test_ignore_filters: [~r{test/test_helpers\.ex$}],
       deps: deps()
     ]
   end

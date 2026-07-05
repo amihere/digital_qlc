@@ -10,7 +10,7 @@ defmodule QlcDigital.Test.MockWhatsappClient do
 
   def start_link(opts) do
     config = Keyword.get(opts, :config, %{})
-    
+
     initial_state = %{
       token: config[:token],
       phone_id: config[:phone_id],
@@ -32,7 +32,7 @@ defmodule QlcDigital.Test.MockWhatsappClient do
 
   def send_message(to, message) do
     timestamp = DateTime.utc_now()
-    
+
     Agent.update(@agent_name, fn state ->
       sent_message = %{
         to: to,
@@ -40,7 +40,7 @@ defmodule QlcDigital.Test.MockWhatsappClient do
         timestamp: timestamp,
         status: :sent
       }
-      
+
       %{state | sent_messages: [sent_message | state.sent_messages]}
     end)
 

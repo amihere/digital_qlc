@@ -5,7 +5,16 @@ defmodule QlcDigital.Signup do
 
   @derive Jason.Encoder
 
-  defstruct [:name, :phone_number, :email, :location, :country, :age, :mental_health_experience, :notes]
+  defstruct [
+    :name,
+    :phone_number,
+    :email,
+    :location,
+    :country,
+    :age,
+    :mental_health_experience,
+    :notes
+  ]
 
   def new(attrs \\ %{}) do
     struct(__MODULE__, attrs)

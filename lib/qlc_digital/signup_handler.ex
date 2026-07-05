@@ -19,7 +19,7 @@ defmodule QlcDigital.SignupHandler do
 
       {:error, rest} ->
         Logger.error("airtable failed")
-        Logger.error(rest)
+        Logger.error(inspect(rest))
     end
   end
 

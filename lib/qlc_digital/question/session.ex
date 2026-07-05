@@ -5,8 +5,8 @@ defmodule QlcDigital.Question.Session do
 
   require Logger
 
-  alias QlcDigital.Question.{Conversation, ConversationManager, QuestionConfig}
-  alias QlcDigital.{SignupHandler, EpdsScorer, ResponseSaver}
+  alias QlcDigital.Question.{Checkpoints, Conversation, ConversationManager, QuestionConfig}
+  alias QlcDigital.{EpdsScorer, ResponseSaver}
 
   # override the current user's flow
   defp reroute(session_id, stage) do
@@ -34,7 +34,17 @@ defmodule QlcDigital.Question.Session do
         reroute(session_id, "start")
 
       String.match?(answer, ~r/^sos$/) ->
-        reroute(session_id, "crisis_checkin")
+        case reroute(session_id, "crisis_checkin") do
+          {:ok, :new, [initial: initial, q: conversation]} ->
+            # Record the trigger and alert the care team immediately
+            flagged = Conversation.add_answer(conversation, "sos_flag", "triggered")
+            :ok = ConversationManager.save_conversation(flagged)
+            Task.start(fn -> ResponseSaver.save_flag_snapshot(flagged) end)
+            {:ok, :new, [initial: initial, q: flagged]}
+
+          other ->
+            other
+        end
 
       String.match?(answer, ~r/^eli return$/) ->
         {:ok, conversation} = ConversationManager.load_conversation(session_id)
@@ -134,6 +144,40 @@ defmodule QlcDigital.Question.Session do
     "#{text}\n\n#{choices}\n\nChoose (1 - #{length(options)})"
   end
 
+  def display_question(%{type: :multi_choice, options: options} = question, answers) do
+    choices =
+      options
+      |> Enum.with_index(1)
+      |> Enum.map(fn {option, index} -> "\n#{index} #{option}" end)
+
+    text = format_text(question.text, answers)
+
+    "#{text}\n\n#{choices}\n\nYou can choose more than one - reply with the numbers separated by commas, for example: 1,3 (1 - #{length(options)})"
+  end
+
+  @doc """
+  Normalizes a multi-select answer like "1,3,5" or "1 3 5" into a sorted,
+  deduplicated "1,3,5" string. Every token must be a valid 1-based option
+  index; otherwise returns :error.
+  """
+  def parse_multi_choice(answer, option_count) when is_binary(answer) do
+    indices =
+      answer
+      |> String.split(~r/[,\s]+/, trim: true)
+      |> Enum.map(fn token ->
+        case Integer.parse(token) do
+          {index, ""} when index >= 1 and index <= option_count -> index
+          _ -> nil
+        end
+      end)
+
+    if indices == [] or Enum.any?(indices, &is_nil/1) do
+      :error
+    else
+      {:ok, indices |> Enum.uniq() |> Enum.sort() |> Enum.join(",")}
+    end
+  end
+
   def answer_question(%Conversation{} = conversation, answer) do
     current_question = QuestionConfig.get_question(conversation.current_question_id)
 
@@ -150,40 +194,22 @@ defmodule QlcDigital.Question.Session do
           next_question_id =
             determine_next_question(current_question, updated_conversation.answers)
 
+          # Computed routing and side effects (EPDS resolution, Airtable writes, ...)
+          {next_question_id, updated_conversation, side_effects} =
+            Checkpoints.apply(current_question.id, next_question_id, updated_conversation)
+
           # Update current question
           final_conversation =
             Conversation.set_current_question(updated_conversation, next_question_id)
 
-          # Upsert bio info to Airtable when reaching parenthood_stage
-          if next_question_id == "parenthood_stage" do
-            Task.start(fn -> SignupHandler.upsert_bio_info(final_conversation) end)
-          end
-
-          # Add EPDS score to conversation when reaching epds_completion
-          final_conversation_with_score =
-            if next_question_id == "epds_completion" do
-              score_data = EpdsScorer.calculate_epds_score(final_conversation)
-
-              Conversation.add_answer(
-                final_conversation,
-                "epds_score",
-                "#{score_data.total_score}/#{score_data.max_score}"
-              )
-            else
-              final_conversation
-            end
-
-          # Save complete response to Airtable when conversation ends
-          if next_question_id == "final_summary" do
-            Task.start(fn ->
-              ResponseSaver.save_complete_response(final_conversation_with_score)
-            end)
-          end
+          Enum.each(side_effects, fn side_effect ->
+            Task.start(fn -> side_effect.(final_conversation) end)
+          end)
 
           # Save to Redis
-          :ok = ConversationManager.save_conversation(final_conversation_with_score)
+          :ok = ConversationManager.save_conversation(final_conversation)
 
-          {:ok, final_conversation_with_score}
+          {:ok, final_conversation}
 
         {:error, reason} ->
           {:error, reason}
@@ -211,10 +237,26 @@ defmodule QlcDigital.Question.Session do
   end
 
   defp validate_answer(%{type: :choice, options: options}, answer) when is_binary(answer) do
+    text_index = Enum.find_index(options, &(&1 == answer))
+
     cond do
-      answer in options -> {:ok, answer}
+      # Store the option's index so downstream case routing (which is
+      # index-based) works whether the user typed the number or the text
+      text_index != nil -> {:ok, Integer.to_string(text_index + 1)}
       answer in (1..Enum.count(options) |> Enum.map(&Integer.to_string(&1))) -> {:ok, answer}
       true -> {:error, "Please choose from: #{Enum.join(1..Enum.count(options), ", ")}"}
+    end
+  end
+
+  defp validate_answer(%{type: :multi_choice, options: options}, answer)
+       when is_binary(answer) do
+    case parse_multi_choice(answer, Enum.count(options)) do
+      {:ok, normalized} ->
+        {:ok, normalized}
+
+      :error ->
+        {:error,
+         "Please reply with one or more numbers between 1 and #{Enum.count(options)}, separated by commas - for example: 1,3"}
     end
   end
 

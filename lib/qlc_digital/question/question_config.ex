@@ -118,7 +118,9 @@ defmodule QlcDigital.Question.QuestionConfig do
         text: question_text,
         type: Map.get(attributes, :type, :text),
         options: Map.get(attributes, :options, []),
-        next: parse_next_value(Map.get(attributes, :next))
+        next: parse_next_value(Map.get(attributes, :next)),
+        # raw Next string kept for reference validation (case nexts compile to functions)
+        next_raw: Map.get(attributes, :next)
       }
     else
       nil
@@ -233,29 +235,7 @@ defmodule QlcDigital.Question.QuestionConfig do
     invalid_refs =
       questions
       |> Map.values()
-      |> Enum.flat_map(fn q ->
-        case q.next do
-          nil ->
-            []
-
-          next when is_binary(next) ->
-            if MapSet.member?(question_ids, next) do
-              []
-            else
-              vals = String.split(" -> ")
-              last = List.last(vals)
-
-              [last | vals]
-              |> Enum.filter(&String.contains?(&1, ","))
-              |> Enum.map(&(String.split(&1, ", ") |> List.first()))
-              |> Enum.filter(&MapSet.member?(question_ids, &1))
-            end
-
-          # Skip function validation
-          _func ->
-            []
-        end
-      end)
+      |> Enum.flat_map(&validate_question_next(&1, question_ids))
 
     if Enum.empty?(invalid_refs) do
       :ok
@@ -263,6 +243,45 @@ defmodule QlcDigital.Question.QuestionConfig do
       {:error, {:invalid_references, invalid_refs}}
     end
   end
+
+  defp validate_question_next(%{next: nil}, _question_ids), do: []
+
+  defp validate_question_next(%{id: id, next: next}, question_ids) when is_binary(next) do
+    if MapSet.member?(question_ids, next) do
+      []
+    else
+      ["#{id}: unknown next '#{next}'"]
+    end
+  end
+
+  defp validate_question_next(%{id: id, next_raw: raw, options: options}, question_ids)
+       when is_binary(raw) do
+    if String.contains?(raw, "case") do
+      # Same extraction the compiled route function uses (routes are positional,
+      # so the number of routes must match the number of options exactly)
+      targets =
+        Regex.scan(~r"->\s*([^,]+)", raw, capture: :all_but_first)
+        |> Enum.map(fn [target] -> String.trim(target) end)
+
+      unknown =
+        targets
+        |> Enum.reject(&MapSet.member?(question_ids, &1))
+        |> Enum.map(&"#{id}: unknown next '#{&1}'")
+
+      count_mismatch =
+        if length(targets) == length(options) do
+          []
+        else
+          ["#{id}: #{length(targets)} routes for #{length(options)} options"]
+        end
+
+      unknown ++ count_mismatch
+    else
+      []
+    end
+  end
+
+  defp validate_question_next(_question, _question_ids), do: []
 
   def export_to_markdown(file_path \\ "exported_questions.md") do
     questions = get_all_questions()

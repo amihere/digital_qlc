@@ -97,9 +97,30 @@ defmodule QlcDigital.EpdsScorer do
 
     %{
       total_score: final_score,
+      # true clinical sum without the Q10 routing override (used for Airtable)
+      raw_total: total_score,
       max_score: 30,
       interpretation: interpret_score(final_score)
     }
+  end
+
+  @anxiety_flag_threshold 6
+
+  @doc """
+  EPDS anxiety subscale (Matthey et al.): items 3, 4 and 5, range 0-9.
+  Clinically significant when the sub-score is >= 6.
+  """
+  def calculate_anxiety_subscore(%Conversation{} = conversation) do
+    answers = conversation.answers || %{}
+
+    score =
+      ["epds_q3", "epds_q4", "epds_q5"]
+      |> Enum.map(fn question_id ->
+        score_question(question_id, map_correct_value(answers, question_id))
+      end)
+      |> Enum.sum()
+
+    %{score: score, flagged: score >= @anxiety_flag_threshold}
   end
 
   defp score_question(question_id, answer) when is_binary(answer) do
