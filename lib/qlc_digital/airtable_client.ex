@@ -16,6 +16,14 @@ defmodule QlcDigital.AirtableClient do
     }
   end
 
+  # Error responses are not always JSON (proxies, outages); never raise here
+  defp decode_error_body(response_body) do
+    case Jason.decode(response_body) do
+      {:ok, decoded} -> decoded
+      {:error, _} -> response_body
+    end
+  end
+
   # Create a new record
   def create_record(%__MODULE__{} = client, fields) do
     url = build_url(client)
@@ -32,7 +40,7 @@ defmodule QlcDigital.AirtableClient do
         {:ok, Jason.decode!(response_body)}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}
@@ -71,7 +79,7 @@ defmodule QlcDigital.AirtableClient do
         end
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}
@@ -89,7 +97,7 @@ defmodule QlcDigital.AirtableClient do
         {:ok, denormalize_record(record)}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}
@@ -113,7 +121,7 @@ defmodule QlcDigital.AirtableClient do
         {:ok, denormalize_record(record)}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}
@@ -135,7 +143,7 @@ defmodule QlcDigital.AirtableClient do
         {:ok, %{records: records, offset: response["offset"]}}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}
@@ -152,7 +160,7 @@ defmodule QlcDigital.AirtableClient do
         {:ok, Jason.decode!(response_body)}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        {:error, {status_code, Jason.decode!(response_body)}}
+        {:error, {status_code, decode_error_body(response_body)}}
 
       {:error, reason} ->
         {:error, reason}

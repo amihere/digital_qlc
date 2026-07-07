@@ -3,9 +3,10 @@ defmodule QlcDigital.TestHelpers do
   Test helper functions for QlcDigital testing.
   """
 
+  import ExUnit.Assertions
+
   alias QlcDigital.Test.{MockWhatsappClient, MockRedis}
-  alias QlcDigital.Question.{ConversationManager, QuestionConfig}
-  alias QlcDigital.Question.{Conversation, Session}
+  alias QlcDigital.Question.{Conversation, ConversationManager}
 
   @doc """
   Clears all test state - sent messages, conversations, and resets questions.
@@ -137,4 +138,3 @@ defmodule QlcDigital.TestHelpers do
     Process.sleep(100)
   end
 end
-

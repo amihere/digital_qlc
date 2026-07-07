@@ -3,7 +3,7 @@ defmodule QlcDigital.WhatsappClient do
   WhatsApp client agent for sending messages via WhatsApp Business API.
   Centralizes all WhatsApp API interactions and configuration.
   """
-  
+
   use Agent
   require Logger
 
@@ -11,7 +11,7 @@ defmodule QlcDigital.WhatsappClient do
 
   def start_link(opts) do
     config = Keyword.get(opts, :config, %{})
-    
+
     initial_state = %{
       token: config[:token],
       phone_id: config[:phone_id],
@@ -32,13 +32,14 @@ defmodule QlcDigital.WhatsappClient do
 
   def send_message(to, message) do
     config = get_config()
-    
-    body = Jason.encode!(%{
-      messaging_product: "whatsapp",
-      to: to,
-      type: "text",
-      text: %{body: message}
-    })
+
+    body =
+      Jason.encode!(%{
+        messaging_product: "whatsapp",
+        to: to,
+        type: "text",
+        text: %{body: message}
+      })
 
     url = "https://graph.facebook.com/v23.0/#{config.phone_id}/messages"
 
